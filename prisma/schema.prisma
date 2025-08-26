@@ -8,20 +8,103 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  photo     String?
-  role      String   @default("user") // "admin" atau "user"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relasi ke token yang dibuat user ini
-  createdTokens ApiToken[] @relation("CreatedTokens")
+/*
+  ENUMS
+*/
+enum TicketStatus {
+  PENDING
+  CALLED
+  SERVING
+  SKIPPED
+  COMPLETED
+  CANCELLED
 }
 
+/*
+  User
+  - Bisa admin atau user (loket)
+*/
+model User {
+  id        Int       @id @default(autoincrement())
+  code      String?   @unique // misal D-01, K-01, S-01
+  name      String
+  email     String?   @unique
+  password  String
+  role      String    @default("user") // "admin" atau "user"
+  photo     String    @default("/uploads/placeholder.png")
+  queueId   Int?      // queue yang dilayani, null untuk admin
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  queue     Queue?    @relation(fields: [queueId], references: [id])
+  tickets   Ticket[]  @relation("TicketServedByUser")
+  tokens    ApiToken[] @relation("CreatedTokens")
+}
+
+/*
+  Layanan / Antrian
+*/
+model Queue {
+  id            Int       @id @default(autoincrement())
+  code          String    @unique // mis: "DESAINER", "KASIR", "PENGAMBILAN"
+  name          String
+  ticketPrefix  String    // mis. "RZD", "RZK", "RZS"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  users      User[]
+  tickets    Ticket[]
+  sequences  DailySequence[]
+}
+
+/*
+  Tiket / Nomor Antrian
+*/
+model Ticket {
+  id          Int          @id @default(autoincrement())
+  queueId     Int
+  queue       Queue        @relation(fields: [queueId], references: [id])
+  seqNumber   Int          // nomor urut per queue per hari
+  fullNumber  String       // mis. RZD-001
+  status      TicketStatus @default(PENDING)
+  date        DateTime     // startOfDay
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  servedByUserId Int?
+  servedByUser   User?      @relation("TicketServedByUser", fields: [servedByUserId], references: [id])
+
+  @@unique([queueId, date, seqNumber])
+  @@index([queueId, date])
+}
+
+/*
+  DailySequence
+*/
+model DailySequence {
+  id        Int      @id @default(autoincrement())
+  queueId   Int
+  queue     Queue    @relation(fields: [queueId], references: [id])
+  date      DateTime // startOfDay
+  nextSeq   Int      @default(1)
+  updatedAt DateTime @updatedAt
+
+  @@unique([queueId, date])
+}
+
+/*
+  Pengaturan / Setting
+*/
+model Setting {
+  id          Int     @id @default(1)
+  name        String
+  description String
+  logo        String? // bisa null
+}
+
+/*
+  API Token
+*/
 model ApiToken {
   id        Int      @id @default(autoincrement())
   name      String
@@ -29,22 +112,6 @@ model ApiToken {
   createdAt DateTime @default(now())
   revoked   Boolean  @default(false)
 
-  // Foreign key & relasi ke User
   createdBy Int
   creator   User @relation("CreatedTokens", fields: [createdBy], references: [id])
-}
-
-model Item {
-  id        Int      @id @default(autoincrement())
-  name      String
-  desc      String   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Setting {
-  id        Int    @id @default(1) // hanya 1 baris config
-  name      String
-  description String
-  logo      String? // bisa null
 }
