@@ -1,30 +1,115 @@
 // types/index.ts
 
+/*
+|--------------------------------------------------------------------------
+| ENUMS
+|--------------------------------------------------------------------------
+*/
+export type TicketStatus =
+  | "PENDING"
+  | "CALLED"
+  | "SERVING"
+  | "SKIPPED"
+  | "COMPLETED"
+  | "CANCELLED";
+
+/*
+|--------------------------------------------------------------------------
+| MODELS
+|--------------------------------------------------------------------------
+*/
+
 // ✅ User
 export interface User {
   id: number;
+  code?: string | null; // misal D-01, K-01, S-01
   name: string;
-  email: string;
-  photo?: string | null;
-  role?: string;
+  email?: string | null;
+  password: string;
+  role: "admin" | "user";
+  photo: string; // default "/uploads/placeholder.png"
+  queueId?: number | null;
   createdAt: Date;
+  updatedAt: Date;
+
+  // relations
+  queue?: Queue;
+  tickets?: Ticket[];
+  tokens?: ApiToken[];
 }
 
-// ✅ Token
-export type Token = {
+// ✅ Queue / Layanan
+export interface Queue {
+  id: number;
+  code: string; // mis: "DESAINER", "KASIR", "PENGAMBILAN"
+  name: string;
+  ticketPrefix: string; // mis. "RZD", "RZK", "RZS"
+  createdAt: Date;
+  updatedAt: Date;
+
+  // relations
+  users?: User[];
+  tickets?: Ticket[];
+  sequences?: DailySequence[];
+}
+
+// ✅ Ticket / Nomor Antrian
+export interface Ticket {
+  id: number;
+  queueId: number;
+  seqNumber: number; // nomor urut per queue per hari
+  fullNumber: string; // mis. RZD-001
+  status: TicketStatus;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
+
+  servedByUserId?: number | null;
+
+  // relations
+  queue?: Queue;
+  servedByUser?: User;
+}
+
+// ✅ Daily Sequence
+export interface DailySequence {
+  id: number;
+  queueId: number;
+  date: Date; // startOfDay
+  nextSeq: number;
+  updatedAt: Date;
+
+  // relations
+  queue?: Queue;
+}
+
+// ✅ Setting
+export interface Setting {
+  id: number; // default 1
+  name: string;
+  description: string;
+  logo?: string | null;
+}
+
+// ✅ ApiToken
+export interface ApiToken {
   id: number;
   name: string;
   token: string;
-  createdBy: number;
   createdAt: Date;
   revoked: boolean;
-  creator?: {
-    id: number;
-    name: string;
-    email: string;
-    photo?: string;
-  };
-};
+
+  createdBy: number;
+
+  // relations
+  creator?: User;
+}
+
+/*
+|--------------------------------------------------------------------------
+| AUTH / FORM TYPES
+|--------------------------------------------------------------------------
+*/
 
 // ✅ Form data untuk Login dan Register
 export interface LoginFormData {
@@ -38,18 +123,9 @@ export interface RegisterFormData {
   password: string;
 }
 
-// ✅ Tipe standar response dari API
+// ✅ Standar response API
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data?: T;
-}
-
-// ✅ Item
-export interface Item {
-  id: number;
-  name: string;
-  desc: string;
-  createdAt: Date;
-  updatedAt: Date;
 }

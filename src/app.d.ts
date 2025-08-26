@@ -1,4 +1,4 @@
-import type { User, ApiToken, Item } from "$lib/types";
+import type { User, ApiToken } from "$lib/types";
 
 declare global {
   namespace App {
@@ -8,7 +8,6 @@ declare global {
     }
     interface PageData {
       tokens: ApiToken[];
-      items: Item[];
     }
   }
 }
