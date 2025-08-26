@@ -1,26 +1,31 @@
 import prisma from "$lib/server/prisma";
 
 /**
+ * Select standar untuk API Token
+ */
+const tokenSelect = {
+  id: true,
+  name: true,
+  token: true,
+  createdBy: true,
+  createdAt: true,
+  revoked: true,
+  creator: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      photo: true,
+    },
+  },
+};
+
+/**
  * Get all API tokens with user info
  */
 export async function getAllKeys() {
   return prisma.apiToken.findMany({
-    select: {
-      id: true,
-      name: true,
-      token: true,
-      createdBy: true,
-      createdAt: true,
-      revoked: true,
-      creator: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          photo: true,
-        },
-      },
-    },
+    select: tokenSelect,
     orderBy: { createdAt: "desc" },
   });
 }
@@ -31,22 +36,7 @@ export async function getAllKeys() {
 export async function getKeyById(id: number) {
   return prisma.apiToken.findUnique({
     where: { id },
-    select: {
-      id: true,
-      name: true,
-      token: true,
-      createdBy: true,
-      createdAt: true,
-      revoked: true,
-      creator: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          photo: true,
-        },
-      },
-    },
+    select: tokenSelect,
   });
 }
 
@@ -57,21 +47,7 @@ export async function getKeysByUserId(userId: number) {
   return prisma.apiToken.findMany({
     where: { createdBy: userId },
     orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      token: true,
-      createdAt: true,
-      revoked: true,
-      creator: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          photo: true,
-        },
-      },
-    },
+    select: tokenSelect,
   });
 }
 
@@ -88,26 +64,8 @@ export async function createKey({
   createdBy: number;
 }) {
   return prisma.apiToken.create({
-    data: {
-      name,
-      token,
-      createdBy,
-    },
-    select: {
-      id: true,
-      name: true,
-      token: true,
-      createdAt: true,
-      revoked: true,
-      creator: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          photo: true,
-        },
-      },
-    },
+    data: { name, token, createdBy },
+    select: tokenSelect,
   });
 }
 
@@ -131,13 +89,7 @@ export async function updateKey(
   return prisma.apiToken.update({
     where: { id },
     data,
-    select: {
-      id: true,
-      name: true,
-      token: true,
-      createdAt: true,
-      revoked: true,
-    },
+    select: tokenSelect,
   });
 }
 
@@ -147,5 +99,9 @@ export async function updateKey(
 export async function deleteKey(id: number) {
   return prisma.apiToken.delete({
     where: { id },
+    select: {
+      id: true,
+      name: true,
+    },
   });
 }

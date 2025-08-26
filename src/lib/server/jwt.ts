@@ -1,7 +1,7 @@
 // src/lib/server/jwt.ts
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "changeme";
+const JWT_SECRET = process.env.JWT_SECRET || "rizaputra-77";
 
 export function signJwt(payload: object): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
