@@ -1,7 +1,7 @@
 // src/routes/users/+page.server.ts
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { getAllUsers, getUserById } from '$lib/server/userService';
+import { getAllUsers, getUserById } from '$lib/server/services/user.service';
 import type { User } from '$lib/types';
 
 export const load: PageServerLoad = async (event) => {

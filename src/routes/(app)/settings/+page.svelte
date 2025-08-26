@@ -2,7 +2,7 @@
   import DefaultLayout from '$lib/layouts/DefaultLayout.svelte';
   import FormInput from '$lib/components/ui/FormInput.svelte';
   import Button from '$lib/components/ui/Button.svelte';
-  import NotificationModal from '$lib/components/NotificationModal.svelte';
+  import NotificationModal from '$lib/components/modal/NotificationModal.svelte';
   import { invalidateAll } from "$app/navigation";
   import { tick } from "svelte";
 

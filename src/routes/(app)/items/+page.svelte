@@ -1,12 +1,12 @@
 <script lang="ts">
   import DefaultLayout from "$lib/layouts/DefaultLayout.svelte";
   import ItemTable from "$lib/components/ItemTable.svelte";
-  import TableToolbar from "$lib/components/TableToolbar.svelte";
+  import TableToolbar from "$lib/components/table/TableToolbar.svelte";
   import ItemFormModal from "$lib/components/ItemFormModal.svelte";
-  import PageHeader from "$lib/components/PageHeader.svelte";
-  import Pagination from "$lib/components/Pagination.svelte";
-  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
-  import ValidationModal from "$lib/components/ValidationModal.svelte";
+  import PageHeader from "$lib/components/table/PageHeader.svelte";
+  import Pagination from "$lib/components/table/Pagination.svelte";
+  import ConfirmModal from "$lib/components/modal/ConfirmModal.svelte";
+  import ValidationModal from "$lib/components/modal/ValidationModal.svelte";
 
   import { z } from "zod";
   import { tick } from "svelte";

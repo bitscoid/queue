@@ -3,7 +3,7 @@ import {
   updateItem,
   deleteItem,
   getItemById,
-} from "$lib/server/itemService";
+} from "$lib/server/services/item.service";
 import { requireAnyRole } from "$lib/server/auth";
 import type { RequestHandler } from "./$types";
 import { itemSchema } from "$lib/validations/itemSchema";

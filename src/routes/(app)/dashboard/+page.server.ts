@@ -1,7 +1,7 @@
 // src/routes/(app)/dashboard/+page.server.ts
-import { getAllItems } from "$lib/server/itemService";
-import { getAllUsers } from "$lib/server/userService";
-import { getAllKeys } from "$lib/server/tokenService";
+import { getAllItems } from "$lib/server/services/item.service";
+import { getAllUsers } from "$lib/server/services/user.service";
+import { getAllKeys } from "$lib/server/services/token.service";
 import { redirect } from "@sveltejs/kit";
 
 export async function load({ locals }) {

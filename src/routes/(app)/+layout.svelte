@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import { setting } from "$lib/stores/setting";
+  import { setting } from "$lib/client/stores/setting.store.js";
 
   export let data;
   $: currentPath = $page.url.pathname;

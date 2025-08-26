@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import ValidationModal from '$lib/components/ValidationModal.svelte';
+  import ValidationModal from '$lib/components/modal/ValidationModal.svelte';
 
   let email = '';
   let password = '';

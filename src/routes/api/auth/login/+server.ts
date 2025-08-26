@@ -3,7 +3,7 @@ import prisma from "$lib/server/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { json } from "@sveltejs/kit";
-import { loginSchema } from "$lib/validations/authSchema";
+import { loginSchema } from "$lib/validations/auth";
 import type { RequestHandler } from "./$types";
 
 const JWT_SECRET = process.env.JWT_SECRET || "changeme";

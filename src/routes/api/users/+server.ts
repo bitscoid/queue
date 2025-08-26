@@ -5,9 +5,9 @@ import {
   getAllUsers,
   createUser,
   getUserByEmail,
-} from "$lib/server/userService";
+} from "$lib/server/services/user.service";
 import type { RequestHandler } from "./$types";
-import { userSchema } from "$lib/validations/userSchema";
+import { userSchema } from "$lib/validations/user";
 
 // GET: hanya admin yang boleh akses
 export const GET: RequestHandler = async (event) => {

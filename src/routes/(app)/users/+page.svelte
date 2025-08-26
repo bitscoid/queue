@@ -1,14 +1,14 @@
 <script lang="ts">
   import DefaultLayout from "$lib/layouts/DefaultLayout.svelte";
-  import UserTable from "$lib/components/UserTable.svelte";
-  import TableToolbar from "$lib/components/TableToolbar.svelte";
-  import UserFormModal from "$lib/components/UserFormModal.svelte";
-  import PageHeader from "$lib/components/PageHeader.svelte";
-  import Pagination from "$lib/components/Pagination.svelte";
-  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
-  import ValidationModal from "$lib/components/ValidationModal.svelte";
+  import UserTable from "$lib/components/user/UserTable.svelte";
+  import TableToolbar from "$lib/components/table/TableToolbar.svelte";
+  import UserFormModal from "$lib/components/user/UserFormModal.svelte";
+  import PageHeader from "$lib/components/table/PageHeader.svelte";
+  import Pagination from "$lib/components/table/Pagination.svelte";
+  import ConfirmModal from "$lib/components/modal/ConfirmModal.svelte";
+  import ValidationModal from "$lib/components/modal/ValidationModal.svelte";
 
-  import { userSchema, userUpdateSchema } from "$lib/validations/userSchema";
+  import { userSchema, userUpdateSchema } from "$lib/validations/user";
   import { z } from "zod";
   import { tick } from "svelte";
   import type { User } from "$lib/types";

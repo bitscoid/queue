@@ -1,8 +1,8 @@
 import { json } from "@sveltejs/kit";
-import { updateUser, deleteUser, getUserById } from "$lib/server/userService";
+import { updateUser, deleteUser, getUserById } from "$lib/server/services/user.service";
 import { requireAdmin, requireRoleOrSelf } from "$lib/server/auth";
 import type { RequestHandler } from "./$types";
-import { userUpdateSchema } from "$lib/validations/userSchema";
+import { userUpdateSchema } from "$lib/validations/user";
 
 // PUT: update user by ID (boleh oleh admin atau user itu sendiri)
 export const PUT: RequestHandler = async (event) => {

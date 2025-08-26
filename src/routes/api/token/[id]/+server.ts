@@ -1,8 +1,8 @@
 import { json } from "@sveltejs/kit";
-import { updateKey, deleteKey, getKeyById } from "$lib/server/tokenService";
+import { updateKey, deleteKey, getKeyById } from "$lib/server/services/token.service";
 import { isAdmin, requireAnyRole } from "$lib/server/auth";
 import type { RequestHandler } from "./$types";
-import { tokenUpdateSchema } from "$lib/validations/tokenSchema";
+import { tokenUpdateSchema } from "$lib/validations/token";
 
 // GET /api/token/:id
 export const GET: RequestHandler = async (event) => {

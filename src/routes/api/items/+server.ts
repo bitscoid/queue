@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { getAllItems, createItem } from '$lib/server/itemService';
+import { getAllItems, createItem } from '$lib/server/services/item.service';
 import { requireAnyRole } from '$lib/server/auth';
 import type { RequestHandler } from './$types';
 import { itemSchema } from '$lib/validations/itemSchema';

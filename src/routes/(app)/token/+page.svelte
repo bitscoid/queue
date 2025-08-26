@@ -1,11 +1,11 @@
 <script lang="ts">
   import DefaultLayout from "$lib/layouts/DefaultLayout.svelte";
-  import TokenTable from "$lib/components/TokenTable.svelte";
-  import TableToolbar from "$lib/components/TableToolbar.svelte";
-  import TokenFormModal from "$lib/components/TokenFormModal.svelte";
-  import PageHeader from "$lib/components/PageHeader.svelte";
-  import Pagination from "$lib/components/Pagination.svelte";
-  import ConfirmModal from "$lib/components/ConfirmModal.svelte";
+  import TokenTable from "$lib/components/token/TokenTable.svelte";
+  import TableToolbar from "$lib/components/table/TableToolbar.svelte";
+  import TokenFormModal from "$lib/components/token/TokenFormModal.svelte";
+  import PageHeader from "$lib/components/table/PageHeader.svelte";
+  import Pagination from "$lib/components/table/Pagination.svelte";
+  import ConfirmModal from "$lib/components/modal/ConfirmModal.svelte";
   import type { Token } from "$lib/types";
 
   export let data: { keys: Token[] };

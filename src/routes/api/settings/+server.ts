@@ -1,9 +1,9 @@
 import { json } from "@sveltejs/kit";
-import { getSetting, updateSetting } from "$lib/server/settingService";
+import { getSetting, updateSetting } from "$lib/server/services/setting.service";
 import type { RequestHandler } from "./$types";
-import { saveFile } from "$lib/server/uploadService";
+import { saveFile } from "$lib/server/services/upload.service";
 import { requireAnyRole, requireAdmin } from "$lib/server/auth";
-import { settingSchema } from "$lib/validations/settingSchema";
+import { settingSchema } from "$lib/validations/setting";
 
 export const GET: RequestHandler = async (event) => {
   requireAnyRole(event);

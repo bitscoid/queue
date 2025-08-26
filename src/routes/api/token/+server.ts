@@ -3,10 +3,10 @@ import {
   getAllKeys,
   createKey,
   getKeysByUserId,
-} from "$lib/server/tokenService";
+} from "$lib/server/services/token.service";
 import { requireAnyRole, isAdmin } from "$lib/server/auth";
 import type { RequestHandler } from "./$types";
-import { tokenSchema } from "$lib/validations/tokenSchema";
+import { tokenSchema } from "$lib/validations/token";
 
 export const GET: RequestHandler = async (event) => {
   requireAnyRole(event);
