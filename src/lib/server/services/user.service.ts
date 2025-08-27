@@ -11,6 +11,14 @@ const userSelect = {
   queueId: true,
   createdAt: true,
   updatedAt: true,
+  queue: {
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      ticketPrefix: true,
+    },
+  },
 };
 
 /**
@@ -40,6 +48,17 @@ export async function getUserByEmail(email: string) {
   if (!email) return null; // karena nullable
   return prisma.user.findUnique({
     where: { email },
+    // butuh password untuk login, jadi jangan pakai userSelect
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      email: true,
+      password: true,
+      role: true,
+      photo: true,
+      queueId: true,
+    },
   });
 }
 

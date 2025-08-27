@@ -4,7 +4,6 @@
   import { ChevronUp, ChevronDown, Pencil, Trash2 } from "lucide-svelte";
 
   export let users: User[] = [];
-  // export let onRowClick: (user: User) => void; Pakai Buat Detail
   export let onEdit: (user: User) => void;
   export let onDelete: (user: User) => void;
 
@@ -19,12 +18,12 @@
 <div
   class="overflow-x-auto rounded-xl shadow border border-base-200 bg-base-100"
 >
-  <table class="table w-full min-w-[700px] text-sm">
+  <table class="table w-full min-w-[900px] text-sm">
     <thead class="bg-base-100 text-base-content">
       <tr>
         <th class="cursor-pointer" on:click={() => onSort("name")}>
           <div class="flex items-center gap-1">
-            Nama
+            Nama & Email
             {#if sortKey === "name"}
               {#if sortDirection === "asc"}
                 <ChevronUp class="w-4 h-4 text-base-content/70" />
@@ -35,10 +34,13 @@
           </div>
         </th>
 
-        <th class="cursor-pointer" on:click={() => onSort("email")}>
+        <th>Loket</th>
+        <th>Kode</th>
+
+        <th class="cursor-pointer" on:click={() => onSort("role")}>
           <div class="flex items-center gap-1">
-            Email
-            {#if sortKey === "email"}
+            Role
+            {#if sortKey === "role"}
               {#if sortDirection === "asc"}
                 <ChevronUp class="w-4 h-4 text-base-content/70" />
               {:else}
@@ -47,17 +49,14 @@
             {/if}
           </div>
         </th>
-
-        <th>Role</th>
-
         <th class="text-right pr-4">Aksi</th>
       </tr>
     </thead>
+
     <tbody>
       {#each users as user}
-        <!-- Pakai 
-          on:click={() => onRowClick(user)} Buat Detail-->
         <tr class="hover:bg-base-100 transition cursor-pointer">
+          <!-- Nama + Foto + Email -->
           <td>
             <div class="flex items-center gap-3">
               <div class="avatar">
@@ -72,12 +71,20 @@
               </div>
               <div>
                 <div class="font-medium text-base-content">{user.name}</div>
+                <div class="text-xs text-base-content/70">
+                  {user.email ?? "-"}
+                </div>
               </div>
             </div>
           </td>
 
-          <td>{user.email}</td>
+          <!-- Loket -->
+          <td>{user.queue?.name ?? "-"}</td>
 
+          <!-- Kode -->
+          <td>{user.code ?? "-"}</td>
+
+          <!-- Role -->
           <td>
             <div
               class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize
@@ -87,6 +94,7 @@
             </div>
           </td>
 
+          <!-- Aksi -->
           <td class="text-right space-x-2 whitespace-nowrap">
             {#if isAdmin || user.id === currentUserId}
               <IconButton

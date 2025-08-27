@@ -1,34 +1,34 @@
 <script lang="ts">
-  import DefaultLayout from '$lib/layouts/DefaultLayout.svelte';
-  import FormInput from '$lib/components/ui/FormInput.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import NotificationModal from '$lib/components/modal/NotificationModal.svelte';
+  import DefaultLayout from "$lib/layouts/DefaultLayout.svelte";
+  import FormInput from "$lib/components/ui/FormInput.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import NotificationModal from "$lib/components/modal/NotificationModal.svelte";
   import { invalidateAll } from "$app/navigation";
   import { tick } from "svelte";
 
   let isSubmitting = false;
   let showNotifModal = false;
-  let notifTitle = '';
-  let notifMessage = '';
-  let notifType: 'success' | 'error' = 'success';
+  let notifTitle = "";
+  let notifMessage = "";
+  let notifType: "success" | "error" = "success";
 
   function closeNotifModal() {
     showNotifModal = false;
   }
 
   export let data;
-  let name = '';
-  let description = '';
+  let name = "";
+  let description = "";
   let file: File | null = null;
   let logoPreview: string | null = null;
   let fileInput: HTMLInputElement; // untuk reset input file
 
-  const isAdmin = data.user?.role === 'admin';
+  const isAdmin = data.user?.role === "admin";
 
   // isi awal dari data load
   $: if (data?.setting) {
-    name = data.setting.name ?? '';
-    description = data.setting.description ?? '';
+    name = data.setting.name ?? "";
+    description = data.setting.description ?? "";
     logoPreview = data.setting.logo ?? null;
   }
 
@@ -56,7 +56,7 @@
 
       const res = await fetch("/api/settings", {
         method: "POST",
-        body: form
+        body: form,
       });
 
       if (!res.ok) {
@@ -80,7 +80,6 @@
       // pastikan modal muncul dulu, baru invalidate data di seluruh app
       await tick();
       await invalidateAll();
-
     } catch (err: any) {
       notifTitle = "Gagal";
       notifMessage = err.message || "Terjadi kesalahan.";
@@ -98,11 +97,26 @@
 
     <form on:submit|preventDefault={handleSubmit} class="space-y-4">
       {#if logoPreview}
-        <img src={logoPreview} class="w-32 h-32 mt-2 object-contain rounded" alt="Preview Logo" />
+        <img
+          src={logoPreview}
+          class="w-32 h-32 mt-2 object-contain rounded"
+          alt="Preview Logo"
+        />
       {/if}
 
-      <FormInput label="Nama Aplikasi" bind:value={name} required readonly={!isAdmin} />
-      <FormInput label="Deskripsi" bind:value={description} readonly={!isAdmin} />
+      <FormInput
+        id="name"
+        label="Nama Aplikasi"
+        bind:value={name}
+        required
+        readonly={!isAdmin}
+      />
+      <FormInput
+        id="desc"
+        label="Deskripsi"
+        bind:value={description}
+        readonly={!isAdmin}
+      />
 
       {#if isAdmin}
         <div>
@@ -118,7 +132,11 @@
         </div>
 
         <div class="flex justify-center gap-4 mt-6">
-          <Button type="submit" className="btn-primary text-center py-2" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            className="btn-primary text-center py-2"
+            disabled={isSubmitting}
+          >
             {#if isSubmitting}
               Menyimpan...
             {:else}

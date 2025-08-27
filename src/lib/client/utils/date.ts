@@ -60,3 +60,7 @@ export function toISOStringLocal(date: Date): string {
   const tzoffset = date.getTimezoneOffset() * 60000; // offset dalam ms
   return new Date(date.getTime() - tzoffset).toISOString().slice(0, -1);
 }
+
+export function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}

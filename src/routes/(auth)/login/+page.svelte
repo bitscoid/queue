@@ -1,6 +1,6 @@
 <script lang="ts">
   import AuthLayout from '$lib/layouts/AuthLayout.svelte';
-  import LoginForm from '$lib/components/LoginForm.svelte';
+  import LoginForm from '$lib/components/login/LoginForm.svelte';
 
   function handleSuccess() {
     window.location.href = '/dashboard';

@@ -6,42 +6,47 @@
   import PageHeader from "$lib/components/table/PageHeader.svelte";
   import Pagination from "$lib/components/table/Pagination.svelte";
   import ConfirmModal from "$lib/components/modal/ConfirmModal.svelte";
-  import type { Token } from "$lib/types";
+  import NotificationModal from "$lib/components/modal/NotificationModal.svelte"; // 🔔 pakai modal notifikasi
+  import type { ApiToken } from "$lib/types";
 
-  export let data: { keys: Token[] };
+  export let data: { keys: ApiToken[] };
 
-  let keys: Token[] = Array.isArray(data?.keys) ? data.keys : [];
+  let keys: ApiToken[] = Array.isArray(data?.keys) ? data.keys : [];
 
-  let keyToDelete: Token | null = null;
+  let keyToDelete: ApiToken | null = null;
   const confirmModalId = "delete-key-confirm";
 
-  let selectedToken: Token | null = null;
+  let selectedToken: ApiToken | null = null;
   let showTokenModal = false;
   let isEditMode = false;
   let loading = false;
 
-  let keyForm = {
-    name: "",
-    token: "",
-  };
+  // 🔔 State notifikasi
+  let showNotification = false;
+  let notifTitle = "";
+  let notifMessage = "";
+  let notifType: "success" | "error" = "success";
+
+  function notify(type: "success" | "error", title: string, message: string) {
+    notifType = type;
+    notifTitle = title;
+    notifMessage = message;
+    showNotification = true;
+  }
+
+  let keyForm = { name: "", token: "" };
 
   function openAddModal() {
     isEditMode = false;
     selectedToken = null;
-    keyForm = {
-      name: "",
-      token: "",
-    };
+    keyForm = { name: "", token: "" };
     showTokenModal = true;
   }
 
-  function openEditModal(key: Token) {
+  function openEditModal(key: ApiToken) {
     isEditMode = true;
     selectedToken = key;
-    keyForm = {
-      name: key.name,
-      token: key.token,
-    };
+    keyForm = { name: key.name, token: key.token };
     showTokenModal = true;
   }
 
@@ -75,15 +80,21 @@
           keys = keys.map((k) =>
             k.id === selectedToken!.id ? { ...k, ...result } : k
           );
+          notify("success", "Berhasil", "Token berhasil diperbarui ✅");
         } else {
           keys = [...keys, result];
+          notify("success", "Berhasil", "Token baru berhasil ditambahkan ✅");
         }
         onClose();
       } else {
-        alert(result?.message || result?.error || "Gagal menyimpan token");
+        notify(
+          "error",
+          "Gagal",
+          result?.message || result?.error || "Gagal menyimpan token"
+        );
       }
     } catch {
-      alert("Terjadi kesalahan saat mengirim data");
+      notify("error", "Error", "Terjadi kesalahan saat mengirim data");
     } finally {
       loading = false;
     }
@@ -98,14 +109,19 @@
 
     if (res.ok) {
       keys = keys.filter((k) => k.id !== keyToDelete?.id);
+      notify(
+        "success",
+        "Berhasil",
+        `Token "${keyToDelete?.name}" berhasil dihapus ✅`
+      );
     } else {
-      alert("Gagal menghapus token");
+      notify("error", "Gagal", "Token gagal dihapus ❌");
     }
 
     keyToDelete = null;
   }
 
-  function askDelete(key: Token) {
+  function askDelete(key: ApiToken) {
     keyToDelete = key;
     setTimeout(() => {
       document.getElementById(confirmModalId)?.click();
@@ -116,7 +132,7 @@
   let searchKeyword = "";
   let currentPage = 1;
   const pageSize = 7;
-  let sortKey: keyof Token = "name";
+  let sortKey: keyof ApiToken = "name";
   let sortDirection: "asc" | "desc" = "asc";
 
   $: filteredTokens = keys.filter(
@@ -153,7 +169,7 @@
     currentPage = 1;
   }
 
-  function toggleSort(key: keyof Token) {
+  function toggleSort(key: keyof ApiToken) {
     if (sortKey === key) {
       sortDirection = sortDirection === "asc" ? "desc" : "asc";
     } else {
@@ -162,7 +178,7 @@
     }
   }
 
-  function paginate(array: Token[], page: number, size: number) {
+  function paginate(array: ApiToken[], page: number, size: number) {
     const start = (page - 1) * size;
     return array.slice(start, start + size);
   }
@@ -213,5 +229,14 @@
     cancelText="Batal"
     cancelClass="btn-outline btn-warning"
     onConfirm={onConfirmDelete}
+  />
+
+  <!-- 🔔 Notification Modal -->
+  <NotificationModal
+    bind:show={showNotification}
+    title={notifTitle}
+    message={notifMessage}
+    type={notifType}
+    onClose={() => (showNotification = false)}
   />
 </DefaultLayout>

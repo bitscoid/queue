@@ -104,6 +104,7 @@
     "daisyui": "^5.0.50",
     "jsonwebtoken": "^9.0.2",
     "lucide-svelte": "^0.525.0",
+    "svelte-portal": "^2.2.1",
     "tailwindcss": "^4.1.12",
     "zod": "^4.1.1"
   }

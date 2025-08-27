@@ -7,10 +7,11 @@
   import Pagination from "$lib/components/table/Pagination.svelte";
   import ConfirmModal from "$lib/components/modal/ConfirmModal.svelte";
   import ValidationModal from "$lib/components/modal/ValidationModal.svelte";
+  import NotificationModal from "$lib/components/modal/NotificationModal.svelte"; // tambahkan
 
   import { userSchema, userUpdateSchema } from "$lib/validations/user";
   import { z } from "zod";
-  import { tick } from "svelte";
+  import { tick, onMount } from "svelte";
   import type { User } from "$lib/types";
 
   export let data: {
@@ -22,6 +23,7 @@
   const { users: initialUsers, isAdmin, currentUserId } = data;
 
   let users = [...initialUsers];
+  let queues: { id: number; code: string; name: string }[] = [];
   let userToDelete: User | null = null;
   let selectedUser: User | null = null;
   let showUserModal = false;
@@ -35,32 +37,74 @@
   let sortDirection: "asc" | "desc" = "asc";
 
   let userForm = {
+    code: "",
     name: "",
     email: "",
     password: "",
-    photo: "",
+    photo: "/uploads/placeholder.png",
     role: "user",
+    queueId: null as number | null,
   };
 
   let validationMessages: string[] = [];
   let showValidationModal = false;
 
+  // --- Notification state ---
+  let showNotification = false;
+  let notificationMessage = "";
+  let notificationType: "success" | "error" = "success";
+
+  function showNotif(message: string, type: "success" | "error" = "success") {
+    notificationMessage = message;
+    notificationType = type;
+    showNotification = true;
+  }
+
+  function closeNotification() {
+    showNotification = false;
+    notificationMessage = "";
+  }
+
+  // Fetch queues
+  onMount(async () => {
+    try {
+      const res = await fetch("/api/queues");
+      if (res.ok) {
+        queues = await res.json();
+      } else {
+        console.error("Gagal fetch queues");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // helper
+  function normalizeUser(raw: any): User {
+    return {
+      ...raw,
+      role: (raw.role ?? "user") as "admin" | "user",
+      photo: raw.photo ?? "/uploads/placeholder.png",
+      createdAt: raw.createdAt
+        ? new Date(raw.createdAt).toISOString()
+        : new Date().toISOString(),
+      updatedAt: raw.updatedAt
+        ? new Date(raw.updatedAt).toISOString()
+        : new Date().toISOString(),
+    };
+  }
+
   function openAddModal() {
     isEditMode = false;
     selectedUser = null;
-    userForm = { name: "", email: "", password: "", photo: "", role: "user" };
-    showUserModal = true;
-  }
-
-  function openEditModal(user: User) {
-    isEditMode = true;
-    selectedUser = user;
     userForm = {
-      name: user.name,
-      email: user.email,
+      code: "",
+      name: "",
+      email: "",
       password: "",
-      photo: user.photo ?? "",
-      role: user.role ?? "user",
+      photo: "/uploads/placeholder.png",
+      role: "user",
+      queueId: null,
     };
     showUserModal = true;
   }
@@ -98,17 +142,20 @@
       const result = await res.json().catch(() => ({}));
 
       if (res.ok) {
+        const normalized = normalizeUser(result);
         if (isEditMode && selectedUser) {
           users = users.map((u) =>
-            u.id === selectedUser!.id ? { ...u, ...result } : u
+            u.id === selectedUser!.id ? { ...u, ...normalized } : u
           );
+          showNotif("User berhasil diperbarui", "success");
         } else {
-          users = [...users, result];
+          users = [...users, normalized];
+          showNotif("User berhasil ditambahkan", "success");
         }
         closeFormModal();
       } else {
         closeFormModal();
-        await tick(); // pastikan modal form sudah keluar sebelum tampilkan validation modal
+        await tick();
         validationMessages = [
           result?.message || result?.error || "Gagal menyimpan data",
         ];
@@ -135,6 +182,9 @@
     });
     if (res.ok) {
       users = users.filter((u) => u.id !== userToDelete?.id);
+      showNotif("User berhasil dihapus", "success");
+    } else {
+      showNotif("Gagal menghapus user", "error");
     }
     userToDelete = null;
   }
@@ -165,10 +215,25 @@
     }
   }
 
+  function openEditModal(user: User) {
+    isEditMode = true;
+    selectedUser = user;
+    userForm = {
+      code: user.code ?? "",
+      name: user.name ?? "",
+      email: user.email ?? "",
+      password: "",
+      photo: user.photo ?? "/uploads/placeholder.png",
+      role: user.role ?? "user",
+      queueId: user.queueId ?? null,
+    };
+    showUserModal = true;
+  }
+
   $: filteredUsers = users.filter(
     (u) =>
-      u.name.toLowerCase().includes(searchKeyword) ||
-      u.email.toLowerCase().includes(searchKeyword)
+      (u.name ?? "").toLowerCase().includes(searchKeyword) ||
+      (u.email ?? "").toLowerCase().includes(searchKeyword)
   );
 
   $: sortedUsers = [...filteredUsers].sort((a, b) => {
@@ -222,6 +287,7 @@
     {loading}
     initial={userForm}
     {isAdmin}
+    {queues}
     on:submit={(e) => onSubmit(e.detail)}
     on:close={closeFormModal}
   />
@@ -231,6 +297,13 @@
     title="Validasi Gagal"
     messages={validationMessages}
     onClose={closeValidationModal}
+  />
+
+  <NotificationModal
+    show={showNotification}
+    message={notificationMessage}
+    type={notificationType}
+    onClose={closeNotification}
   />
 
   {#if isAdmin}

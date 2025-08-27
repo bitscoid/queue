@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Token } from "$lib/types";
+  import type { ApiToken } from "$lib/types";
   import IconButton from "$lib/components/ui/IconButton.svelte";
   import {
     ChevronUp,
@@ -10,13 +10,13 @@
     XCircle,
   } from "lucide-svelte";
 
-  export let tokens: Token[] = [];
-  export let onEdit: (token: Token) => void;
-  export let onDelete: (token: Token) => void;
+  export let tokens: ApiToken[] = [];
+  export let onEdit: (token: ApiToken) => void;
+  export let onDelete: (token: ApiToken) => void;
 
-  export let sortKey: keyof Token = "createdAt";
+  export let sortKey: keyof ApiToken = "createdAt";
   export let sortDirection: "asc" | "desc" = "desc";
-  export let onSort: (key: keyof Token) => void;
+  export let onSort: (key: keyof ApiToken) => void;
 </script>
 
 <div

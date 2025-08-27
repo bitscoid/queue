@@ -71,6 +71,23 @@ export interface Ticket {
   servedByUser?: User;
 }
 
+// ✅ Ticket versi untuk ditampilkan di UI (sudah "diratakan")
+export interface TicketDisplay {
+  id: number;
+  fullNumber: string;
+  status: TicketStatus;
+  date: string;       // selalu string (ISO format) supaya aman
+  createdAt: string;
+  updatedAt: string;
+
+  queueId: number;
+  queueName: string;  // diturunkan dari relation Queue
+  seqNumber: number;
+
+  servedById?: number | null;
+  servedByName: string; // diturunkan dari relation User
+}
+
 // ✅ Daily Sequence
 export interface DailySequence {
   id: number;
