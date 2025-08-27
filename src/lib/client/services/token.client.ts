@@ -1,65 +1,37 @@
-import type { Token } from "$lib/types";
+// src/lib/client/services/token.service.ts
+import { fetcher } from "$lib/client/utils/fetcher";
+import { tokenSchema, tokenUpdateSchema } from "$lib/validations/token";
+import type { TokenFormSchema, TokenUpdateSchema } from "$lib/validations/token";
 
-export async function createKey(data: {
-  name: string;
-  token: string;
-  createdBy: number;
-}): Promise<Token> {
-  const res = await fetch("/api/token", {
+// Create token
+export async function createKey(data: TokenFormSchema): Promise<TokenFormSchema> {
+  return fetcher<TokenFormSchema>("/api/token", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    throw new Error("Gagal membuat token");
-  }
-
-  return (await res.json()) as Token;
+    headers: { "Content-Type": "application/json" },
+  }, tokenSchema);
 }
 
-export async function updateKey(
-  id: number,
-  data: {
-    name?: string;
-    revoked?: boolean;
-  },
-): Promise<Token> {
-  const res = await fetch(`/api/token/${id}`, {
+// Update token
+export async function updateKey(id: number, data: TokenUpdateSchema): Promise<TokenUpdateSchema> {
+  return fetcher<TokenUpdateSchema>(`/api/token/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    throw new Error("Gagal memperbarui token");
-  }
-
-  return (await res.json()) as Token;
+    headers: { "Content-Type": "application/json" },
+  }, tokenUpdateSchema);
 }
 
+// Delete token
 export async function deleteKey(id: number): Promise<boolean> {
-  const res = await fetch(`/api/token/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!res.ok) {
-    throw new Error("Gagal menghapus token");
+  try {
+    await fetcher<null>(`/api/token/${id}`, { method: "DELETE" });
+    return true;
+  } catch {
+    return false;
   }
-
-  return true;
 }
 
-export async function getKey(id: number): Promise<Token> {
-  const res = await fetch(`/api/token/${id}`);
-
-  if (!res.ok) {
-    throw new Error("Gagal mengambil token");
-  }
-
-  return (await res.json()) as Token;
+// Get token by ID
+export async function getKey(id: number): Promise<TokenFormSchema> {
+  return fetcher<TokenFormSchema>(`/api/token/${id}`, {}, tokenSchema);
 }

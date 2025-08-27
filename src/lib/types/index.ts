@@ -115,11 +115,10 @@ export interface ApiToken {
   token: string;
   createdAt: Date;
   revoked: boolean;
-
   createdBy: number;
 
   // relations
-  creator?: User;
+  creator?: Partial<User>;
 }
 
 /*

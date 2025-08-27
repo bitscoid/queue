@@ -1,10 +1,12 @@
 // src/lib/stores/setting.ts
 import { writable } from "svelte/store";
 
-export type Setting = {
-    name: string;
-    description: string;
-    logo: string | null;
-};
+export const setting = writable<{ name?: string; description?: string; logo?: string }>({});
 
-export const setting = writable<Setting | null>(null);
+export function initSetting(data: { appName?: string; appDesc?: string; appLogo?: string }) {
+    setting.set({
+        name: data.appName,
+        description: data.appDesc,
+        logo: data.appLogo
+    });
+}
