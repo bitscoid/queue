@@ -12,6 +12,7 @@
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "🏠" },
+    { href: "/calls", label: "Calls", icon: "🎫" },
     { href: "/queues", label: "Queues", icon: "🎫" },
     { href: "/tickets", label: "Tickets", icon: "🎫" },
     { href: "/users", label: "Users", icon: "👤" },

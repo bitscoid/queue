@@ -57,6 +57,7 @@ export const handle: Handle = async ({ event, resolve }) => {
               role: true,
               createdAt: true,
               photo: true,
+              queueId: true
             },
           },
         },
@@ -94,6 +95,7 @@ export const handle: Handle = async ({ event, resolve }) => {
           role: true,
           createdAt: true,
           photo: true,
+          queueId: true
         },
       });
 

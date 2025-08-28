@@ -3,6 +3,7 @@ declare global {
   namespace App {
     interface Locals {
       user?: {
+        queueId: any;
         id: number;
         name: string;
         email: string | null;
