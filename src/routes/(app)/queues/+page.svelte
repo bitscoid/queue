@@ -224,7 +224,7 @@
   <TableToolbar on:search={(e) => handleSearch(e.detail)} />
 
   <QueueTable
-    {queues}
+    queues={paginatedQueues}
     onEdit={openEditModal}
     onDelete={askDelete}
     {sortKey}

@@ -3,7 +3,6 @@
   import IconButton from "$lib/components/ui/IconButton.svelte";
   import type { TicketDisplay } from "$lib/types";
 
-  // Props
   export let tickets: TicketDisplay[] = [];
   export let onEdit: (ticket: TicketDisplay) => void;
   export let onDelete: (ticket: TicketDisplay) => void;
@@ -23,10 +22,8 @@
           <div class="flex items-center gap-1">
             Ticket
             {#if sortKey === "fullNumber"}
-              {#if sortDirection === "asc"}
-                <ChevronUp class="w-4 h-4" />
-              {:else}
-                <ChevronDown class="w-4 h-4" />
+              {#if sortDirection === "asc"}<ChevronUp class="w-4 h-4" />
+              {:else}<ChevronDown class="w-4 h-4" />
               {/if}
             {/if}
           </div>
@@ -44,7 +41,7 @@
     </thead>
 
     <tbody>
-      {#each tickets as t}
+      {#each tickets as t (t.id)}
         <tr class="hover:bg-base-100 transition">
           <td>{t.fullNumber}</td>
           <td>{t.queueName}</td>

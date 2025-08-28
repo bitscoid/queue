@@ -206,7 +206,7 @@
     return array.slice(start, start + size);
   }
 
-  function toggleSort(key: keyof User) {
+  function toggleSort(key: keyof User | "queue") {
     if (sortKey === key) {
       sortDirection = sortDirection === "asc" ? "desc" : "asc";
     } else {
@@ -214,6 +214,28 @@
       sortDirection = "asc";
     }
   }
+
+  $: sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aVal: any;
+    let bVal: any;
+
+    if (sortKey === "queue") {
+      aVal = a.queue?.name ?? "";
+      bVal = b.queue?.name ?? "";
+    } else {
+      aVal = a[sortKey] ?? "";
+      bVal = b[sortKey] ?? "";
+    }
+
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    return 0;
+  });
+
+  $: paginatedUsers = paginate(sortedUsers, currentPage, pageSize);
 
   function openEditModal(user: User) {
     isEditMode = true;
@@ -235,19 +257,6 @@
       (u.name ?? "").toLowerCase().includes(searchKeyword) ||
       (u.email ?? "").toLowerCase().includes(searchKeyword)
   );
-
-  $: sortedUsers = [...filteredUsers].sort((a, b) => {
-    const aVal = a[sortKey] ?? "";
-    const bVal = b[sortKey] ?? "";
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      return sortDirection === "asc"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-    return 0;
-  });
-
-  $: paginatedUsers = paginate(sortedUsers, currentPage, pageSize);
 </script>
 
 <DefaultLayout title="Users">

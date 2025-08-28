@@ -3,16 +3,18 @@
   import TicketTable from "$lib/components/ticket/TicketTable.svelte";
   import TableToolbar from "$lib/components/table/TableToolbar.svelte";
   import TicketFormModal from "$lib/components/ticket/TicketFormModal.svelte";
-  import PageHeader from "$lib/components/table/PageHeader.svelte";
   import Pagination from "$lib/components/table/Pagination.svelte";
-  import ConfirmModal from "$lib/components/modal/ConfirmModal.svelte";
   import ValidationModal from "$lib/components/modal/ValidationModal.svelte";
   import NotificationModal from "$lib/components/modal/NotificationModal.svelte";
+  import ConfirmModal from "$lib/components/modal/ConfirmModal.svelte";
 
-  import { ticketSchema } from "$lib/validations/ticket";
+  import { tick, onMount } from "svelte";
+  import type { Ticket, TicketDisplay, Queue, TicketStatus } from "$lib/types";
   import { z } from "zod";
-  import { tick } from "svelte";
-  import type { Ticket, TicketDisplay } from "$lib/types";
+  import {
+    createTicket,
+    updateTicket,
+  } from "$lib/client/services/ticket.client";
 
   export let data: {
     tickets: Ticket[];
@@ -22,12 +24,13 @@
 
   const { tickets: initialTickets, isAdmin, currentUserId } = data;
 
-  // 🔹 Normalisasi Ticket → TicketDisplay
   let tickets: TicketDisplay[] = initialTickets.map(normalizeTicket);
+  let queues: Queue[] = [];
   let ticketToDelete: TicketDisplay | null = null;
   let selectedTicket: TicketDisplay | null = null;
   let showTicketModal = false;
-  let isEditMode = false;
+  let showResetModal = false;
+  let modalMode: "add" | "edit" | "reset" = "add";
   let loading = false;
   let currentPage = 1;
   const pageSize = 7;
@@ -35,18 +38,11 @@
   let searchKeyword = "";
   let sortKey: keyof TicketDisplay = "fullNumber";
   let sortDirection: "asc" | "desc" = "asc";
+  let ticketForm: { queueId: number; status?: TicketStatus } = { queueId: 0 };
+  let resetForm: { queueId: number } = { queueId: 0 };
 
-  let ticketForm = {
-    queueId: 0,
-    seqNumber: 0,
-    status: "PENDING",
-  };
-
-  // --- Validation Modal ---
   let validationMessages: string[] = [];
   let showValidationModal = false;
-
-  // --- Notification Modal ---
   let showNotification = false;
   let notifTitle = "";
   let notifMessage = "";
@@ -63,7 +59,6 @@
     showNotification = true;
   }
 
-  // ---------- Helpers ----------
   function normalizeTicket(raw: Ticket): TicketDisplay {
     return {
       id: raw.id,
@@ -71,13 +66,18 @@
         raw.fullNumber ??
         `${raw.queue?.ticketPrefix}-${String(raw.seqNumber).padStart(3, "0")}`,
       status: raw.status,
-      date: raw.date
-        ? new Date(raw.date).toISOString()
-        : new Date().toISOString(),
-      createdAt: new Date(raw.createdAt).toISOString(),
-      updatedAt: new Date(raw.updatedAt).toISOString(),
+      date: raw.date instanceof Date ? raw.date.toISOString() : raw.date,
+      createdAt:
+        raw.createdAt instanceof Date
+          ? raw.createdAt.toISOString()
+          : raw.createdAt,
+      updatedAt:
+        raw.updatedAt instanceof Date
+          ? raw.updatedAt.toISOString()
+          : raw.updatedAt,
       queueId: raw.queueId,
-      queueName: raw.queue?.name ?? "",
+      queueName:
+        raw.queue?.name ?? queues.find((q) => q.id === raw.queueId)?.name ?? "", // fallback ke queues
       seqNumber: raw.seqNumber,
       servedById: raw.servedByUserId ?? null,
       servedByName: raw.servedByUser?.name ?? "",
@@ -95,162 +95,164 @@
   }
 
   function toggleSort(key: keyof TicketDisplay) {
-    if (sortKey === key) {
+    if (sortKey === key)
       sortDirection = sortDirection === "asc" ? "desc" : "asc";
-    } else {
+    else {
       sortKey = key;
       sortDirection = "asc";
     }
   }
 
-  // ---------- Modal CRUD ----------
   function openAddModal() {
-    isEditMode = false;
+    modalMode = "add";
     selectedTicket = null;
-    ticketForm = { queueId: 0, seqNumber: 0, status: "PENDING" };
+    ticketForm = { queueId: 0 };
     showTicketModal = true;
   }
 
   function openEditModal(ticket: TicketDisplay) {
-    isEditMode = true;
+    modalMode = "edit";
     selectedTicket = ticket;
-    ticketForm = {
-      queueId: ticket.queueId,
-      seqNumber: ticket.seqNumber,
-      status: ticket.status,
-    };
+    ticketForm = { queueId: ticket.queueId, status: ticket.status };
     showTicketModal = true;
+  }
+
+  function openResetModal() {
+    modalMode = "reset";
+    resetForm = { queueId: 0 };
+    showResetModal = true;
   }
 
   function closeFormModal() {
     showTicketModal = false;
   }
-
+  function closeResetModal() {
+    showResetModal = false;
+  }
   function closeValidationModal() {
     showValidationModal = false;
     validationMessages = [];
   }
 
-  async function onSubmit(payload: typeof ticketForm) {
+  async function loadQueues() {
+    const res = await fetch("/api/queues");
+    queues = await res.json();
+  }
+
+  async function onSubmit(payload: {
+    queueId?: number;
+    status?: TicketStatus;
+  }) {
     loading = true;
-    validationMessages = [];
-
     try {
-      const validated = ticketSchema.parse(payload);
+      if (modalMode === "add" && payload.queueId) {
+        const newTicket = await createTicket(payload.queueId);
 
-      const endpoint =
-        isEditMode && selectedTicket
-          ? `/api/tickets/${selectedTicket.id}`
-          : "/api/tickets";
+        // normalisasi dan pastikan queueName langsung ada
+        const ticketDisplay = normalizeTicket(newTicket);
 
-      const method = isEditMode ? "PUT" : "POST";
+        // assign ulang array untuk reaktivitas
+        tickets = [...tickets, ticketDisplay];
 
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validated),
-      });
+        notify(
+          "success",
+          "Berhasil",
+          `Ticket ${ticketDisplay.fullNumber} ditambahkan ✅`
+        );
+      } else if (modalMode === "edit" && selectedTicket && payload.status) {
+        const updated = await updateTicket(selectedTicket.id, {
+          status: payload.status,
+        });
+        const updatedDisplay = normalizeTicket(updated);
 
-      const result = await res.json().catch(() => ({}));
+        // assign ulang array
+        tickets = tickets.map((t) =>
+          t.id === selectedTicket!.id ? updatedDisplay : t
+        );
 
-      if (res.ok) {
-        const normalized = normalizeTicket(result as Ticket);
-        if (isEditMode && selectedTicket) {
-          tickets = tickets.map((t) =>
-            t.id === selectedTicket!.id ? { ...t, ...normalized } : t
-          );
-          notify(
-            "success",
-            "Berhasil",
-            `Ticket ${normalized.fullNumber} diperbarui ✅`
-          );
-        } else {
-          tickets = [...tickets, normalized];
-          notify(
-            "success",
-            "Berhasil",
-            `Ticket ${normalized.fullNumber} ditambahkan ✅`
-          );
-        }
-        closeFormModal();
-      } else {
-        closeFormModal();
-        await tick();
-        validationMessages = [
-          result?.message || result?.error || "Gagal menyimpan data",
-        ];
-        showValidationModal = true;
+        notify(
+          "success",
+          "Berhasil",
+          `Ticket ${updatedDisplay.fullNumber} diperbarui ✅`
+        );
+      } else if (modalMode === "reset" && payload.queueId) {
+        await onResetSequence({ queueId: payload.queueId });
       }
-    } catch (err) {
+
       closeFormModal();
+    } catch (err) {
       await tick();
-      if (err instanceof z.ZodError) {
-        validationMessages = err.issues.map((e) => e.message);
-      } else {
-        validationMessages = ["Terjadi kesalahan saat mengirim data"];
-      }
+      validationMessages =
+        err instanceof z.ZodError
+          ? err.issues.map((e) => e.message)
+          : ["Terjadi kesalahan"];
       showValidationModal = true;
     } finally {
       loading = false;
     }
   }
 
+  async function onResetSequence(payload: { queueId: number }) {
+    if (payload.queueId <= 0) return;
+    loading = true;
+    try {
+      const res = await fetch("/api/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok)
+        notify("success", "Berhasil", "Sequence tiket berhasil direset ✅");
+      else notify("error", "Gagal", "Reset sequence gagal ❌");
+    } catch {
+      notify("error", "Gagal", "Terjadi kesalahan saat reset sequence ❌");
+    } finally {
+      loading = false;
+      showResetModal = false;
+    }
+  }
+
   function askDelete(ticket: TicketDisplay) {
     ticketToDelete = ticket;
-    setTimeout(() => {
-      document.getElementById(confirmModalId)?.click();
-    }, 0);
+    setTimeout(() => document.getElementById(confirmModalId)?.click(), 0);
   }
 
   async function onConfirmDelete() {
     if (!ticketToDelete) return;
-
     const res = await fetch(`/api/tickets/${ticketToDelete.id}`, {
       method: "DELETE",
     });
-    if (res.ok) {
-      tickets = tickets.filter((t) => t.id !== ticketToDelete?.id);
-      notify(
-        "success",
-        "Berhasil",
-        `Ticket ${ticketToDelete.fullNumber} dihapus ✅`
-      );
-    } else {
-      notify("error", "Gagal", "Ticket gagal dihapus ❌");
-    }
+    if (res.ok) tickets = tickets.filter((t) => t.id !== ticketToDelete?.id);
     ticketToDelete = null;
   }
 
-  // ---------- Reactive ----------
-  $: filteredTickets = tickets.filter(
-    (t) =>
-      (t.fullNumber ?? "").toLowerCase().includes(searchKeyword) ||
-      (t.queueName ?? "").toLowerCase().includes(searchKeyword) ||
-      (t.servedByName ?? "").toLowerCase().includes(searchKeyword)
+  $: filteredTickets = tickets.filter((t) =>
+    (t.fullNumber ?? "").toLowerCase().includes(searchKeyword)
   );
-
-  $: sortedTickets = [...filteredTickets].sort((a, b) => {
-    const aVal = a[sortKey] ?? "";
-    const bVal = b[sortKey] ?? "";
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      return sortDirection === "asc"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-    return 0;
-  });
-
+  $: sortedTickets = [...filteredTickets].sort((a, b) =>
+    typeof a[sortKey] === "string"
+      ? sortDirection === "asc"
+        ? (a[sortKey] as string).localeCompare(b[sortKey] as string)
+        : (b[sortKey] as string).localeCompare(a[sortKey] as string)
+      : 0
+  );
   $: paginatedTickets = paginate(sortedTickets, currentPage, pageSize);
+
+  onMount(loadQueues);
 </script>
 
 <DefaultLayout title="Tickets">
-  <PageHeader
-    title="Tickets"
-    icon="🎫"
-    showAddButton={isAdmin}
-    addLabel="Tambah"
-    onAdd={openAddModal}
-  />
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold flex items-center gap-2">🎫 Tickets</h1>
+    {#if isAdmin}
+      <div class="flex gap-2">
+        <button class="btn btn-primary" on:click={openAddModal}>Tambah</button>
+        <button class="btn btn-warning" on:click={openResetModal}
+          >Reset Sequence</button
+        >
+      </div>
+    {/if}
+  </div>
 
   <TableToolbar on:search={(e) => handleSearch(e.detail)} />
 
@@ -260,8 +262,8 @@
     onDelete={(t) => isAdmin && askDelete(t)}
     {sortKey}
     {sortDirection}
-    onSort={toggleSort}
     {isAdmin}
+    onSort={toggleSort}
   />
 
   <Pagination
@@ -273,11 +275,22 @@
 
   <TicketFormModal
     show={showTicketModal}
-    {isEditMode}
+    mode={modalMode}
     {loading}
     initial={ticketForm}
+    {queues}
     on:submit={(e) => onSubmit(e.detail)}
     on:close={closeFormModal}
+  />
+
+  <TicketFormModal
+    show={showResetModal}
+    mode="reset"
+    {loading}
+    initial={resetForm}
+    {queues}
+    on:submit={(e) => onResetSequence(e.detail)}
+    on:close={closeResetModal}
   />
 
   <ValidationModal

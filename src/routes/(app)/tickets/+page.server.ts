@@ -1,8 +1,8 @@
 // src/routes/(app)/tickets/+page.server.ts
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import prisma from '$lib/server/prisma'; // pastikan import default prisma
-import type { Ticket } from '$lib/client/stores/ticket.store';
+import prisma from '$lib/server/prisma';
+import type { TicketDisplay } from '$lib/types';
 import { startOfDay } from '$lib/client/utils/date';
 
 export const load: PageServerLoad = async (event) => {
@@ -12,17 +12,16 @@ export const load: PageServerLoad = async (event) => {
   }
 
   const isAdmin = user.role === 'admin';
-  let tickets: Ticket[] = [];
+  let tickets: TicketDisplay[] = [];
 
+  // Admin bisa lihat semua ticket
   if (isAdmin) {
     const allTickets = await prisma.ticket.findMany({
       include: {
         queue: true,
         servedByUser: true,
       },
-      orderBy: {
-        date: 'desc',
-      },
+      orderBy: { date: 'desc' },
     });
 
     tickets = allTickets.map((t) => ({
@@ -31,21 +30,24 @@ export const load: PageServerLoad = async (event) => {
       createdAt: t.createdAt.toISOString(),
       updatedAt: t.updatedAt.toISOString(),
       queueName: t.queue?.name ?? '',
-      servedByName: t.servedByUser?.name ?? null,
-      fullNumber: t.fullNumber ?? `${t.queue.ticketPrefix}-${String(t.seqNumber).padStart(3, '0')}`,
+      servedByName: t.servedByUser?.name ?? '',
+      fullNumber:
+        t.fullNumber ??
+        `${t.queue?.ticketPrefix ?? ''}-${String(t.seqNumber).padStart(3, '0')}`,
     }));
   } else {
-    // untuk user biasa, ambil hanya ticket di queue yang dilayani
+    // User biasa, hanya ticket dari queue yang dilayani
     const userWithQueue = await prisma.user.findUnique({
       where: { id: user.id },
       include: { queue: true },
     });
 
-    if (userWithQueue?.queueId) {
+    const queueId = userWithQueue?.queue?.id;
+    if (queueId) {
       const today = startOfDay(new Date());
       const userTickets = await prisma.ticket.findMany({
         where: {
-          queueId: userWithQueue.queueId,
+          queueId,
           date: today,
         },
         include: { queue: true, servedByUser: true },
@@ -58,8 +60,10 @@ export const load: PageServerLoad = async (event) => {
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),
         queueName: t.queue?.name ?? '',
-        servedByName: t.servedByUser?.name ?? null,
-        fullNumber: t.fullNumber ?? `${t.queue.ticketPrefix}-${String(t.seqNumber).padStart(3, '0')}`,
+        servedByName: t.servedByUser?.name ?? '',
+        fullNumber:
+          t.fullNumber ??
+          `${t.queue?.ticketPrefix ?? ''}-${String(t.seqNumber).padStart(3, '0')}`,
       }));
     }
   }

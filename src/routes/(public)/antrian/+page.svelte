@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { fly, fade } from "svelte/transition";
+  import { fade } from "svelte/transition";
   import { getQueues } from "$lib/client/services/queue.client";
   import { createTicket } from "$lib/client/services/ticket.client";
   import {
@@ -8,17 +8,19 @@
     type Setting,
   } from "$lib/client/services/setting.client";
   import type { Queue } from "$lib/client/stores/queue.store";
-  import type { Ticket } from "$lib/client/stores/ticket.store";
+  import type { Ticket } from "$lib/types";
 
   let queues: Queue[] = [];
   let lastTicket: Ticket | null = null;
   let showTicket = false;
+
   let setting: Setting = {
     logo: null,
     name: "Aplikasi Antrian",
     description: "",
   };
 
+  // Jam digital
   let now = new Date();
   const updateClock = () => {
     now = new Date();
@@ -26,35 +28,40 @@
   };
   updateClock();
 
-  function formatDate(d: Date) {
-    return d.toLocaleDateString("id-ID", {
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString("id-ID", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
-  }
-  function formatTime(d: Date) {
-    return d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }
 
+  const formatTime = (d: Date) => {
+    const h = d.getHours().toString().padStart(2, "0");
+    const m = d.getMinutes().toString().padStart(2, "0");
+    const s = d.getSeconds().toString().padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  };
+
+  // Ambil data antrian & setting
   onMount(async () => {
-    queues = await getQueues();
-    setting = await getSetting();
+    try {
+      queues = await getQueues();
+      setting = await getSetting();
+    } catch (err) {
+      console.error("Gagal memuat data:", err);
+    }
   });
 
-  const colors = ["#00C853", "#FFD600", "#2979FF", "#AA00FF", "#FF6D00"]; // hijau, kuning, biru, ungu, oranye
+  const colors = ["#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#9b59b6"];
 
+  // Fungsi ambil tiket
   async function takeTicket(queueId: number) {
     try {
       const ticket = await createTicket(queueId);
       lastTicket = ticket;
       showTicket = true;
-      await tick();
+      await tick(); // tunggu DOM update
       window.print();
       setTimeout(() => (showTicket = false), 3000);
     } catch (err) {
@@ -74,20 +81,26 @@
   <!-- Header -->
   <div class="text-center mb-6">
     {#if setting.logo}
-      <img
-        src={setting.logo}
-        alt="Logo"
-        class="mx-auto w-20 h-20 mb-2 rounded-full border-2 border-white"
-      />
+      <img src={setting.logo} alt="Logo" class="mx-auto w-20 h-20 mb-2" />
     {/if}
-    <h1 class="text-4xl font-bold">{setting.name}</h1>
-    <p class="text-lg">{setting.description}</p>
+    <h1 class="text-5xl font-bold">{setting.name}</h1>
+    <p class="text-xl p-4">{setting.description}</p>
   </div>
 
   <!-- Jam Digital -->
   <div class="text-center mb-6">
     <div class="text-xl font-semibold">{formatDate(now)}</div>
     <div class="text-5xl font-mono">{formatTime(now)}</div>
+  </div>
+
+  <!-- Petunjuk -->
+  <div
+    class="instruction-box mb-6 text-center px-6 py-4 rounded-lg bg-white text-black shadow-md max-w-3xl"
+  >
+    <h2 class="text-2xl font-bold mb-2">Cara Mengambil Nomor Antrian</h2>
+    <p class="text-lg">
+      Silakan pilih layanan di bawah untuk mendapatkan nomor antrian Anda.
+    </p>
   </div>
 
   <!-- Pilih Layanan -->
@@ -110,6 +123,7 @@
   </div>
 </div>
 
+<!-- Popup Tiket -->
 {#if showTicket && lastTicket}
   <div class="ticket-popup" transition:fade={{ duration: 200 }}>
     <div class="ticket-content bg-white text-black shadow-xl">
@@ -117,12 +131,26 @@
         <img src={setting.logo} alt="Logo" class="ticket-logo" />
       {/if}
       <div class="ticket-brand">{setting.name}</div>
+
       <div class="ticket-number">{lastTicket.fullNumber}</div>
+
       <div class="ticket-queue">
-        {queues.find((q) => q.id === lastTicket?.queueId)?.name}
+        {queues.find((q) => q.id === lastTicket!.queueId)?.name}
       </div>
+
       <div class="ticket-date">
-        {new Date(lastTicket.date).toLocaleString("id-ID")}
+        {new Date(lastTicket.date).toLocaleDateString("id-ID", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+        {new Date(lastTicket.date).toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        })}
       </div>
     </div>
   </div>
@@ -130,7 +158,7 @@
 
 <style>
   .bg-orangered {
-    background-color: orangered;
+    background-color: #e74c3c;
   }
 
   .service-card {
@@ -196,6 +224,51 @@
     100% {
       transform: scale(1);
       opacity: 1;
+    }
+  }
+
+  .instruction-box {
+    font-family: "Poppins", sans-serif;
+    text-align: center;
+    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    color: #000;
+  }
+  .instruction-box h2 {
+    color: #e74c3c;
+  }
+  .ticket-content {
+    padding: 2rem 3rem;
+    border-radius: 1rem;
+    text-align: center;
+    font-family: monospace, sans-serif;
+    animation: pop-in 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ticket-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+  }
+
+  @media print {
+    :global(body) * {
+      visibility: hidden;
+    }
+    .ticket-popup,
+    .ticket-popup * {
+      visibility: visible;
+    }
+    .ticket-popup {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
     }
   }
 </style>

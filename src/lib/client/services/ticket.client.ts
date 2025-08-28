@@ -1,7 +1,6 @@
 // src/lib/client/services/ticket.client.ts
 import { fetcher } from "$lib/client/utils/fetcher";
 import { ticketSchema } from "$lib/validations/ticket";
-import type { TicketInput } from "$lib/validations/ticket";
 import type { Ticket } from "../stores/ticket.store";
 
 // Ambil semua tiket
@@ -11,22 +10,25 @@ export async function getTickets(): Promise<Ticket[]> {
 
 // Buat tiket baru
 export async function createTicket(queueId: number): Promise<Ticket> {
-    const payload: TicketInput = {
-        queueId,
-        seqNumber: 1, // default seqNumber sementara, server akan override
-        status: "PENDING"
-    };
+    if (!queueId || queueId <= 0) {
+        throw new Error("Queue harus dipilih");
+    }
 
-    return fetcher<Ticket>("/api/tickets", {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" }
-    }, ticketSchema);
+    // Hanya kirim queueId, server akan generate seqNumber
+    return fetcher<Ticket>(
+        "/api/tickets",
+        {
+            method: "POST",
+            body: JSON.stringify({ queueId }),
+            headers: { "Content-Type": "application/json" }
+        },
+        ticketSchema
+    );
 }
 
 // Update tiket
-export async function updateTicket(id: number, data: Partial<Ticket>): Promise<Ticket> {
-    // jika ingin validasi sebagian field, bisa buat zod partial schema
+export async function updateTicket(id: number, data: Partial<Omit<Ticket, "id" | "seqNumber">>): Promise<Ticket> {
+    // seqNumber jangan dikirim saat update, server yang handle
     return fetcher<Ticket>(`/api/tickets/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),

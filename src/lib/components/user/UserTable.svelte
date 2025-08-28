@@ -33,9 +33,30 @@
             {/if}
           </div>
         </th>
-
-        <th>Loket</th>
-        <th>Kode</th>
+        <th class="cursor-pointer" on:click={() => onSort("queue")}>
+          <div class="flex items-center gap-1">
+            Loket
+            {#if sortKey === "queue"}
+              {#if sortDirection === "asc"}
+                <ChevronUp class="w-4 h-4 text-base-content/70" />
+              {:else}
+                <ChevronDown class="w-4 h-4 text-base-content/70" />
+              {/if}
+            {/if}
+          </div>
+        </th>
+        <th class="cursor-pointer" on:click={() => onSort("code")}>
+          <div class="flex items-center gap-1">
+            Kode
+            {#if sortKey === "code"}
+              {#if sortDirection === "asc"}
+                <ChevronUp class="w-4 h-4 text-base-content/70" />
+              {:else}
+                <ChevronDown class="w-4 h-4 text-base-content/70" />
+              {/if}
+            {/if}
+          </div>
+        </th>
 
         <th class="cursor-pointer" on:click={() => onSort("role")}>
           <div class="flex items-center gap-1">

@@ -2,106 +2,96 @@
   import { createEventDispatcher } from "svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
   import Button from "$lib/components/ui/Button.svelte";
-  import FormInput from "$lib/components/ui/FormInput.svelte";
+  import FormSelect from "$lib/components/ui/FormSelect.svelte";
+  import type { Queue, TicketStatus } from "$lib/types";
 
   export let show = false;
-  export let isEditMode = false;
+  export let mode: "add" | "edit" | "reset" = "add";
   export let loading = false;
-
-  export let initial = {
+  export let initial: { queueId: number; status?: TicketStatus } = {
     queueId: 0,
-    seqNumber: 0,
-    status: "PENDING",
   };
-
-  export let queues: {
-    id: number;
-    name: string;
-    code: string;
-    ticketPrefix: string;
-  }[] = [];
+  export let queues: Queue[] = [];
 
   const dispatch = createEventDispatcher();
 
-  // Bind sebagai string, convert ke number saat submit
+  // queueId hanya dipakai untuk add/reset
   let queueId: string = initial.queueId?.toString() ?? "0";
-  let seqNumber: string = initial.seqNumber?.toString() ?? "0";
-  let status: string = initial.status ?? "PENDING";
-
-  $: if (show) {
+  $: if (show && (mode === "add" || mode === "reset"))
     queueId = initial.queueId?.toString() ?? "0";
-    seqNumber = initial.seqNumber?.toString() ?? "0";
-    status = initial.status ?? "PENDING";
-  }
+
+  // status hanya dipakai untuk edit
+  let status: TicketStatus = initial.status ?? "PENDING";
+  $: if (show && mode === "edit") status = initial.status ?? "PENDING";
+
+  $: options = queues.map((q) => ({
+    value: q.id.toString(),
+    label: `${q.code} - ${q.name}`,
+  }));
+
+  $: modalTitle =
+    mode === "add"
+      ? "Ambil Ticket"
+      : mode === "edit"
+        ? "Edit Ticket"
+        : "Reset Sequence Tiket";
+
+  $: submitLabel =
+    mode === "add"
+      ? "Ambil Antrian"
+      : mode === "edit"
+        ? "Update Status"
+        : "Reset Sequence";
 
   function handleSubmit() {
-    dispatch("submit", {
-      queueId: Number(queueId),
-      seqNumber: Number(seqNumber),
-      status,
-    });
-  }
+    if ((mode === "add" || mode === "reset") && !queueId) return;
 
-  function handleQueueChange(e: Event) {
-    const target = e.target as HTMLSelectElement;
-    queueId = target.value;
-  }
+    const payload: { queueId?: number; status?: TicketStatus } = {};
+    if (mode === "add" || mode === "reset") payload.queueId = Number(queueId);
+    if (mode === "edit") payload.status = status;
 
-  const queueSelectId = "ticket-queue-select";
-  const statusSelectId = "ticket-status-select";
+    dispatch("submit", payload);
+  }
 </script>
 
 <Modal {show} on:close={() => dispatch("close")} size="md">
   <form on:submit|preventDefault={handleSubmit} class="flex flex-col gap-4 p-6">
-    <h2 class="text-2xl font-bold text-center">
-      {isEditMode ? "Edit Ticket" : "Tambah Ticket"}
-    </h2>
+    <h2 class="text-2xl font-bold text-center">{modalTitle}</h2>
 
-    <div class="space-y-4">
-      <!-- Queue select -->
-      <div class="form-control">
-        <label class="label" for={queueSelectId}>Queue</label>
-        <select
-          id={queueSelectId}
-          bind:value={queueId}
-          class="select select-bordered w-full"
-          required
-        >
-          <option value="0">— Pilih Queue —</option>
-          {#each queues as q}
-            <option value={q.id.toString()}>{q.code} - {q.name}</option>
-          {/each}
-        </select>
-      </div>
-
-      <!-- Seq Number -->
-      <FormInput
-        label="Seq Number"
-        type="number"
-        bind:value={seqNumber}
+    {#if mode === "add" || mode === "reset"}
+      <FormSelect
+        id="ticket-queue-select"
+        label="Pilih Queue"
+        bind:value={queueId}
+        {options}
         required
       />
+    {/if}
 
-      <!-- Status select -->
-      <div class="form-control">
-        <label class="label" for={statusSelectId}>Status</label>
-        <select
-          id={statusSelectId}
-          bind:value={status}
-          class="select select-bordered w-full"
-          required
-        >
-          <option value="PENDING">PENDING</option>
-          <option value="SERVED">SERVED</option>
-          <option value="CANCELLED">CANCELLED</option>
-        </select>
-      </div>
-    </div>
+    {#if mode === "edit"}
+      <FormSelect
+        id="ticket-status-select"
+        label="Pilih Status"
+        bind:value={status}
+        options={[
+          { value: "PENDING", label: "PENDING" },
+          { value: "CALLED", label: "CALLED" },
+          { value: "SERVING", label: "SERVING" },
+          { value: "SKIPPED", label: "SKIPPED" },
+          { value: "COMPLETED", label: "COMPLETED" },
+          { value: "CANCELLED", label: "CANCELLED" },
+        ]}
+        required
+      />
+    {/if}
 
-    <!-- Buttons -->
     <div class="flex justify-center gap-4 mt-6">
-      <Button type="submit" {loading} className="btn-primary">
-        {isEditMode ? "Simpan" : "Tambah"}
+      <Button
+        type="submit"
+        {loading}
+        className={mode === "reset" ? "btn-warning" : "btn-primary"}
+      >
+        {submitLabel}
       </Button>
       <Button
         type="button"

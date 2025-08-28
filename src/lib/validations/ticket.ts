@@ -4,7 +4,6 @@ import { z } from "zod";
 // Input untuk create/update tiket
 export const ticketInputSchema = z.object({
     queueId: z.number().min(1, "Queue harus dipilih"),
-    seqNumber: z.number().min(1, "Nomor urut harus lebih dari 0"),
     status: z.enum([
         "PENDING",
         "CALLED",
@@ -13,9 +12,9 @@ export const ticketInputSchema = z.object({
         "COMPLETED",
         "CANCELLED"
     ], "Status tidak valid"),
+    // seqNumber tidak wajib di frontend, server akan generate
 });
 
-// Output dari server
 export const ticketSchema = z.object({
     id: z.number(),
     fullNumber: z.string(),
