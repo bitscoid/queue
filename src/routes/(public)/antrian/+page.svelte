@@ -61,13 +61,118 @@
       const ticket = await createTicket(queueId);
       lastTicket = ticket;
       showTicket = true;
-      await tick(); // tunggu DOM update
-      window.print();
-      setTimeout(() => (showTicket = false), 3000);
+      await tick(); // pastikan DOM update
+
+      // Auto hide popup setelah 5 detik
+      setTimeout(() => {
+        showTicket = false;
+      }, 5000);
+
+      // Tunggu sebentar biar tiket render dulu
+      setTimeout(() => {
+        printTicket();
+      }, 300);
     } catch (err) {
       console.error("Gagal ambil tiket:", err);
       alert("Gagal mengambil tiket, silakan coba lagi.");
     }
+  }
+
+  // Fungsi print via iframe
+  function printTicket() {
+    const ticketEl = document.querySelector(".ticket-content") as HTMLElement;
+    if (!ticketEl) return;
+
+    const printContents = ticketEl.outerHTML;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.left = "-9999px";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
+
+    doc.open();
+    doc.write(`
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: monospace, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+          }
+          .ticket-content { 
+            width: 220px; /* 58mm */
+            margin: 0 auto;
+            padding: 6px 0;
+          }
+          .ticket-logo {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 6px;
+            display: block;
+          }
+          .ticket-brand { 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 2px; 
+          }
+          .ticket-number { 
+            font-size: 28px; 
+            font-weight: bold; 
+            margin: 6px 0; 
+          }
+          .ticket-queue {
+            font-size: 14px;
+            margin-bottom: 4px;
+          }
+          .ticket-date { 
+            font-size: 11px; 
+            margin-bottom: 6px;
+          }
+          .separator {
+            font-size: 12px;
+            margin: 4px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="ticket-content">
+          <div class="ticket-logo">
+            ${
+              (document.querySelector(".ticket-logo") as HTMLElement)
+                ?.outerHTML ?? ""
+            }
+          </div>
+          <div class="ticket-brand">${
+            (document.querySelector(".ticket-brand") as HTMLElement)
+              ?.textContent ?? ""
+          }</div>
+          <div class="separator">------------------------------</div>
+          <div class="ticket-number">${
+            (document.querySelector(".ticket-number") as HTMLElement)
+              ?.textContent ?? ""
+          }</div>
+          <div class="separator">------------------------------</div>
+          <div class="ticket-queue">${
+            (document.querySelector(".ticket-queue") as HTMLElement)
+              ?.textContent ?? ""
+          }</div>
+          <div class="ticket-date">${formatDate(new Date(lastTicket!.date))}</div>
+          <div class="ticket-time">${formatTime(new Date(lastTicket!.date))}</div>
+        </div>
+      </body>
+    </html>
+  `);
+    doc.close();
+
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+
+    setTimeout(() => document.body.removeChild(iframe), 1000);
   }
 </script>
 
@@ -139,18 +244,10 @@
       </div>
 
       <div class="ticket-date">
-        {new Date(lastTicket.date).toLocaleDateString("id-ID", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-        {new Date(lastTicket.date).toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        })}
+        {formatDate(new Date(lastTicket.date))}
+      </div>
+      <div class="ticket-time">
+        {formatTime(new Date(lastTicket.date))}
       </div>
     </div>
   </div>
@@ -239,6 +336,7 @@
   .instruction-box h2 {
     color: #e74c3c;
   }
+
   .ticket-content {
     padding: 2rem 3rem;
     border-radius: 1rem;
@@ -254,21 +352,5 @@
     width: 80px;
     height: 80px;
     margin-bottom: 0.5rem;
-  }
-
-  @media print {
-    :global(body) * {
-      visibility: hidden;
-    }
-    .ticket-popup,
-    .ticket-popup * {
-      visibility: visible;
-    }
-    .ticket-popup {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-    }
   }
 </style>
