@@ -1,205 +1,193 @@
 <script lang="ts">
-  import type { PageData } from "./$types";
-  import type { ActionResult } from "@sveltejs/kit";
-  import { enhance } from "$app/forms";
-  import { tick } from "svelte";
+  import { onMount, tick } from "svelte";
+  import { writable } from "svelte/store";
 
-  export let data: PageData & {
-    queues: { id: number; name: string; code: string; ticketPrefix: string }[];
-    logo: string | null;
-    name: string;
-    description: string;
-  };
-
-  let lastTicket: {
+  type Queue = {
     id: number;
-    fullNumber: string;
-    date: string;
-    queue: { name: string; ticketPrefix: string };
-  } | null = null;
-
-  // waktu realtime
-  let now = new Date();
-  const updateClock = () => {
-    now = new Date();
-    setTimeout(updateClock, 1000);
+    name: string;
+    code: string;
+    color?: string;
+    current: string[];
+    remaining: number;
   };
-  updateClock();
 
-  function formatDate(d: Date) {
-    return d.toLocaleDateString("id-ID", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
+  const queues = writable<Queue[]>([]);
+  const mainTicket = writable<string | null>(null);
+  const animatedTicket = writable<string | null>(null);
+  const bgGradient = writable<string>("linear-gradient(135deg,#333,#444)");
 
-  function formatTime(d: Date) {
-    return d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }
+  let ws: WebSocket;
+  let lastTicket: string | null = null;
 
-  function handleEnhance() {
-    return async ({
-      result,
-    }: {
-      formData: FormData;
-      formElement: HTMLFormElement;
-      action: URL;
-      result: ActionResult;
-      update: (opts?: { reset?: boolean }) => Promise<void>;
-    }) => {
-      if (
-        result?.type === "success" &&
-        result?.data?.success &&
-        result?.data?.ticket
-      ) {
-        lastTicket = result.data.ticket;
+  onMount(() => {
+    ws = new WebSocket("ws://localhost:4000");
+
+    ws.onopen = () => console.log("✅ WebSocket connected");
+
+    ws.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+      queues.set(
+        data.queues.map((q: any) => ({
+          id: q.id,
+          name: q.name,
+          code: q.code,
+          current: q.current,
+          remaining: q.remaining,
+          color: getQueueColor(q.code),
+        }))
+      );
+
+      const activeQueue = data.queues.find((q: any) => q.current.length > 0);
+      const newTicket = activeQueue?.current[0] ?? null;
+
+      mainTicket.set(newTicket);
+      bgGradient.set(getQueueGradient(activeQueue?.code));
+
+      if (newTicket && newTicket !== lastTicket) {
+        lastTicket = newTicket;
+
+        // Play sound
+        const audio = new Audio("/sounds/ping.mp3");
+        audio.play().catch((err) => console.error(err));
+
+        // Animasi zoom ticket utama
+        animatedTicket.set(null);
         await tick();
-        window.print();
+        animatedTicket.set(newTicket);
       }
     };
+
+    ws.onclose = () => console.log("⚠️ WebSocket disconnected");
+    ws.onerror = (err) => console.error("WebSocket error:", err);
+
+    return () => ws.close();
+  });
+
+  function getQueueColor(code: string) {
+    const colors: Record<string, string> = {
+      A: "#4caf50",
+      B: "#2196f3",
+      C: "#ff9800",
+      D: "#9c27b0",
+      E: "#f44336",
+    };
+    return colors[code] ?? "#333";
+  }
+
+  function getQueueGradient(code?: string) {
+    const gradients: Record<string, string> = {
+      A: "linear-gradient(135deg,#4caf50,#81c784)",
+      B: "linear-gradient(135deg,#2196f3,#64b5f6)",
+      C: "linear-gradient(135deg,#ff9800,#ffb74d)",
+      D: "linear-gradient(135deg,#9c27b0,#ba68c8)",
+      E: "linear-gradient(135deg,#f44336,#e57373)",
+    };
+    return code ? (gradients[code] ?? "#333") : "#333";
   }
 </script>
 
-<svelte:head>
-  <title>Ambil Nomor Antrian</title>
-</svelte:head>
-
-<div
-  class="min-h-screen flex flex-col items-center justify-start px-4 py-6 bg-base-200"
->
-  <!-- Header toko -->
-  <div class="text-center mb-6">
-    {#if data.logo}
-      <img src={data.logo} alt="Logo" class="mx-auto w-16 h-16 mb-2" />
+<div class="container">
+  <div class="main" style="background: {$bgGradient}">
+    <div class="label">Now Serving</div>
+    {#if $animatedTicket}
+      <div class="ticket">{$animatedTicket}</div>
+    {:else}
+      <div class="ticket">-</div>
     {/if}
-    <h1 class="text-3xl font-bold">{data.name}</h1>
-    <p class="text-sm text-base-content/70">{data.description}</p>
   </div>
-
-  <!-- Waktu -->
-  <div class="text-center mb-8">
-    <div class="text-lg font-semibold">{formatDate(now)}</div>
-    <div class="text-2xl font-mono">{formatTime(now)}</div>
-  </div>
-
-  <!-- Pilih Layanan -->
-  <div class="w-full max-w-5xl">
-    <h2 class="text-2xl font-bold text-center mb-4">Silakan pilih layanan</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {#each data.queues as q}
-        <form
-          method="POST"
-          use:enhance={handleEnhance}
-          class="card bg-base-100 shadow-xl border border-base-300 hover:scale-105 transition-transform"
-        >
-          <div class="card-body items-center text-center">
-            <div class="text-5xl">🎫</div>
-            <h3 class="card-title mt-2">{q.name}</h3>
-            <input type="hidden" name="queueId" value={q.id} />
-            <button
-              class="btn btn-primary btn-wide text-lg"
-              name="take"
-              formaction="?/take"
-            >
-              Ambil Nomor
-            </button>
-          </div>
-        </form>
-      {/each}
-    </div>
-  </div>
-</div>
-
-<!-- Area print -->
-<div class="print-area">
-  {#if lastTicket}
-    <div class="ticket">
-      {#if data.logo}
-        <img src={data.logo} alt="Logo" class="logo" />
-      {/if}
-      {#if data.name}
-        <div class="brand">{data.name}</div>
-      {/if}
-      {#if data.description}
-        <div class="address">{data.description}</div>
-      {/if}
-
-      <div class="title">{lastTicket.queue.name}</div>
-      <div class="number">{lastTicket.fullNumber}</div>
-      <div class="date">
-        {new Date(lastTicket.date).toLocaleString("id-ID")}
+  <div class="sidebar">
+    {#each $queues as q}
+      <div class="queue">
+        <h3 style="color: {q.color}">{q.name} ({q.code})</h3>
+        <div>Remaining: {q.remaining}</div>
+        {#each q.current as t}
+          <div class="ticket-next">{t}</div>
+        {/each}
       </div>
-      <div class="note">
-        Silakan tunggu panggilan untuk {lastTicket.queue.name}.
-      </div>
-    </div>
-  {/if}
+    {/each}
+  </div>
 </div>
 
 <style>
-  .print-area {
-    display: none;
+  body {
+    margin: 0;
+    font-family: sans-serif;
+    overflow: hidden;
+  }
+  .container {
+    display: flex;
+    height: 100vh;
+    color: #fff;
+  }
+  .main {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: background 1s ease;
+  }
+  .label {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #ffc107;
   }
 
-  @media print {
-    @page {
-      size: 58mm auto;
-      margin: 2mm;
-    }
-    :global(body) * {
-      visibility: hidden;
-    }
-    .print-area,
-    .print-area * {
-      visibility: visible;
-    }
+  .ticket {
+    font-size: 7rem;
+    font-weight: bold;
+    position: absolute;
+    transform: scale(0.5);
+    opacity: 0;
+    animation: zoomIn 0.6s forwards;
+  }
 
-    .print-area {
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 58mm;
-      text-align: center;
-      font-family: monospace, sans-serif;
+  @keyframes zoomIn {
+    0% {
+      transform: scale(0.5);
+      opacity: 0;
     }
+    50% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 
-    .ticket .logo {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 4px;
+  .sidebar {
+    flex: 1;
+    padding: 1rem;
+    background: #111;
+    overflow-y: auto;
+  }
+  .queue {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #444;
+  }
+  .queue h3 {
+    margin: 0 0 0.5rem 0;
+  }
+  .ticket-next {
+    opacity: 0;
+    transform: translateY(-20%);
+    animation: slideDown 0.5s forwards;
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+  @keyframes slideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20%);
     }
-    .ticket .brand {
-      font-size: 14px;
-      font-weight: bold;
-      margin-bottom: 2px;
-    }
-    .ticket .address {
-      font-size: 11px;
-      margin-bottom: 6px;
-    }
-    .ticket .title {
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-    .ticket .number {
-      font-size: 28px;
-      font-weight: bold;
-      margin: 6px 0;
-    }
-    .ticket .date {
-      font-size: 11px;
-      margin-bottom: 4px;
-    }
-    .ticket .note {
-      font-size: 11px;
-      margin-top: 6px;
+    100% {
+      opacity: 1;
+      transform: translateY(0%);
     }
   }
 </style>

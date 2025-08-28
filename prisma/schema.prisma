@@ -24,20 +24,26 @@ enum TicketStatus {
   User
   - Bisa admin atau user (loket)
 */
+
+enum Role {
+  user
+  admin
+}
+
 model User {
   id        Int       @id @default(autoincrement())
-  code      String?   @unique // misal D-01, K-01, S-01
+  code      String?   @unique
   name      String
   email     String?   @unique
   password  String
-  role      String    @default("user") // "admin" atau "user"
+  role      Role      @default(user)   // ← pakai enum
   photo     String    @default("/uploads/placeholder.png")
-  queueId   Int?      // queue yang dilayani, null untuk admin
+  queueId   Int?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  queue     Queue?    @relation(fields: [queueId], references: [id])
-  tickets   Ticket[]  @relation("TicketServedByUser")
+  queue     Queue?     @relation(fields: [queueId], references: [id])
+  tickets   Ticket[]   @relation("TicketServedByUser")
   tokens    ApiToken[] @relation("CreatedTokens")
 }
 
