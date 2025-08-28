@@ -109,7 +109,7 @@
 </div>
 
 <style>
-  body {
+  :global(body) {
     margin: 0;
     font-family: sans-serif;
     overflow: hidden;
