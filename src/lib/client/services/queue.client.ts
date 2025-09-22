@@ -17,7 +17,9 @@ export type QueueOutput = z.infer<typeof queueResponseSchema>;
 
 // Ambil semua queue
 export async function getQueues(): Promise<QueueOutput[]> {
-    return fetcher<QueueOutput[]>("/api/queues");
+    const allQueues = await fetcher<QueueOutput[]>("/api/queues");
+    // Filter hanya layanan DESAINER
+    return allQueues.filter(queue => queue.code === 'DESAINER');
 }
 
 // Buat queue baru

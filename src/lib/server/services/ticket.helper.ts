@@ -23,11 +23,8 @@ export async function generateTicketNumber(queueId: number) {
     // increment daily sequence
     const seq = await incrementDailySequence(queueId, today);
 
-    // format nomor urut jadi 3 digit (001, 002, dst.)
-    const padded = String(seq.nextSeq).padStart(3, "0");
-
-    // gabungkan prefix + nomor
-    const fullNumber = `${queue.ticketPrefix}-${padded}`;
+    // format nomor urut jadi angka sederhana (1, 2, 3, ...)
+    const fullNumber = String(seq.nextSeq);
 
     return {
         queueId,

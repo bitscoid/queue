@@ -53,8 +53,6 @@
     }
   });
 
-  const colors = ["#3498db", "#1abc9c", "#2ecc71", "#f1c40f", "#9b59b6"];
-
   // Fungsi ambil tiket
   async function takeTicket(queueId: number) {
     try {
@@ -116,26 +114,26 @@
             display: block;
           }
           .ticket-brand { 
-            font-size: 16px; 
+            font-size: 24px; 
             font-weight: bold; 
             margin-bottom: 2px; 
           }
           .ticket-number { 
-            font-size: 28px; 
+            font-size: 92px; 
             font-weight: bold; 
-            margin: 6px 0; 
+            margin: 1px 0; 
           }
           .ticket-queue {
-            font-size: 14px;
+            font-size: 24px;
             margin-bottom: 4px;
           }
           .ticket-date { 
-            font-size: 11px; 
+            font-size: 10px; 
             margin-bottom: 6px;
           }
-          .separator {
-            font-size: 12px;
-            margin: 4px 0;
+          .ticket-time { 
+            font-size: 10px; 
+            margin-bottom: 6px;
           }
         </style>
       </head>
@@ -151,14 +149,8 @@
             (document.querySelector(".ticket-brand") as HTMLElement)
               ?.textContent ?? ""
           }</div>
-          <div class="separator">------------------------------</div>
           <div class="ticket-number">${
             (document.querySelector(".ticket-number") as HTMLElement)
-              ?.textContent ?? ""
-          }</div>
-          <div class="separator">------------------------------</div>
-          <div class="ticket-queue">${
-            (document.querySelector(".ticket-queue") as HTMLElement)
               ?.textContent ?? ""
           }</div>
           <div class="ticket-date">${formatDate(new Date(lastTicket!.date))}</div>
@@ -181,67 +173,83 @@
 </svelte:head>
 
 <div
-  class="min-h-screen flex flex-col items-center justify-start px-4 py-6 bg-orangered text-white"
+  class="min-h-screen flex flex-col items-center justify-center px-6 py-10 bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800"
 >
   <!-- Header -->
-  <div class="text-center mb-6">
+  <div class="text-center mb-10">
     {#if setting.logo}
-      <img src={setting.logo} alt="Logo" class="mx-auto w-20 h-20 mb-2" />
+      <img src={setting.logo} alt="Logo" class="mx-auto w-28 h-28 mb-5" />
     {/if}
-    <h1 class="text-5xl font-bold">{setting.name}</h1>
-    <p class="text-xl p-4">{setting.description}</p>
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">{setting.name}</h1>
+    {#if setting.description}
+      <p class="text-xl mt-3 text-gray-600 max-w-2xl mx-auto">{setting.description}</p>
+    {/if}
   </div>
 
   <!-- Jam Digital -->
-  <div class="text-center mb-6">
-    <div class="text-xl font-semibold">{formatDate(now)}</div>
-    <div class="text-5xl font-mono">{formatTime(now)}</div>
+  <div class="text-center mb-14">
+    <div class="text-2xl font-medium text-gray-700 tracking-wide">{formatDate(now)}</div>
+    <div class="text-6xl font-mono font-bold mt-3 text-gray-900 tracking-tighter">{formatTime(now)}</div>
   </div>
 
-  <!-- Petunjuk -->
-  <div
-    class="instruction-box mb-6 text-center px-6 py-4 rounded-lg bg-white text-black shadow-md max-w-3xl"
-  >
-    <h2 class="text-2xl font-bold mb-2">Cara Mengambil Nomor Antrian</h2>
-    <p class="text-lg">
-      Silakan pilih layanan di bawah untuk mendapatkan nomor antrian Anda.
-    </p>
-  </div>
-
-  <!-- Pilih Layanan -->
+  <!-- Tombol Layanan Besar -->
   <div class="w-full max-w-6xl">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      {#each queues as q, i}
+    {#if queues.length === 1}
+      <!-- Single service - center it -->
+      <div class="flex justify-center">
         <button
           type="button"
-          class="service-card"
-          style="background-color: {colors[i % colors.length]}"
-          on:click={() => takeTicket(q.id)}
+          class="service-card group focus:outline-none focus:ring-4 focus:ring-orange-200 max-w-2xl w-full"
+          on:click={() => takeTicket(queues[0].id)}
         >
           <div class="card-body items-center text-center">
-            <div class="text-6xl">🎫</div>
-            <h3 class="text-2xl font-bold mt-2">{q.name}</h3>
+            <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🎫</div>
+            <h3 class="text-2xl font-bold mb-3 text-gray-800">{queues[0].name}</h3>
+            <div class="ticket-button">
+              <span class="font-bold text-lg">Ambil Tiket</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </div>
           </div>
         </button>
-      {/each}
-    </div>
+      </div>
+    {:else}
+      <!-- Multiple services - grid layout -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {#each queues as q, i}
+          <button
+            type="button"
+            class="service-card group focus:outline-none focus:ring-4 focus:ring-orange-200"
+            on:click={() => takeTicket(q.id)}
+          >
+            <div class="card-body items-center text-center">
+              <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🎫</div>
+              <h3 class="text-2xl font-bold mb-3 text-gray-800">{q.name}</h3>
+              <div class="ticket-button">
+                <span class="font-bold text-lg">Ambil Tiket</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </button>
+        {/each}
+      </div>
+    {/if}
   </div>
 </div>
 
 <!-- Popup Tiket -->
 {#if showTicket && lastTicket}
   <div class="ticket-popup" transition:fade={{ duration: 200 }}>
-    <div class="ticket-content bg-white text-black shadow-xl">
+    <div class="ticket-content bg-white text-black shadow-2xl">
       {#if setting.logo}
         <img src={setting.logo} alt="Logo" class="ticket-logo" />
       {/if}
       <div class="ticket-brand">{setting.name}</div>
 
       <div class="ticket-number">{lastTicket.fullNumber}</div>
-
-      <div class="ticket-queue">
-        {queues.find((q) => q.id === lastTicket!.queueId)?.name}
-      </div>
 
       <div class="ticket-date">
         {formatDate(new Date(lastTicket.date))}
@@ -254,25 +262,59 @@
 {/if}
 
 <style>
-  .bg-orangered {
-    background-color: #e74c3c;
-  }
-
   .service-card {
-    border-radius: 1rem;
-    padding: 2rem;
-    color: white;
+    border-radius: 1.5rem;
+    padding: 2.5rem 2rem;
+    background: white;
+    color: #333;
     font-family: sans-serif;
     transition:
-      transform 0.2s,
-      box-shadow 0.2s;
+      all 0.3s ease;
     cursor: pointer;
     width: 100%;
-    height: 180px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 2px solid #f0f0f0;
+    touch-action: manipulation; /* Better touch response */
   }
-  .service-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  
+  .service-card:hover, .service-card:focus {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    border-color: #FFA500;
+  }
+  
+  .service-card:active {
+    transform: translateY(0);
+  }
+  
+  .ticket-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to right, #FF8C00, #FFA500);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+    transition: all 0.3s ease;
+    min-width: 200px; /* Better touch target */
+    min-height: 60px; /* Better touch target */
+    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.2);
+  }
+  
+  .service-card:hover .ticket-button, .service-card:focus .ticket-button {
+    background: linear-gradient(to right, #ff7700, #ff9500);
+    box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
+  }
+  
+  .service-card:active .ticket-button {
+    transform: scale(0.98);
   }
 
   .ticket-popup {
@@ -290,67 +332,87 @@
     animation: pop-in 0.3s ease;
   }
   .ticket-logo {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 0.5rem;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 6px;
+    display: block;
   }
-  .ticket-brand {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+  .ticket-brand { 
+    font-size: 24px; 
+    font-weight: bold; 
+    margin-bottom: 2px; 
   }
-  .ticket-number {
-    font-size: 50px;
-    font-weight: bold;
-    margin: 0.5rem 0;
+  .ticket-number { 
+    font-size: 92px; 
+    font-weight: bold; 
+    margin: 1px 0; 
   }
-  .ticket-queue {
-    font-size: 22px;
-    margin-bottom: 0.5rem;
+  .ticket-date { 
+    font-size: 10px; 
+    margin-bottom: 6px;
   }
-  .ticket-date {
-    font-size: 18px;
+  .ticket-time { 
+    font-size: 10px; 
+    margin-bottom: 6px;
+  }
+
+  .ticket-content {
+    padding: 2.5rem 3.5rem;
+    border-radius: 1.5rem;
+    text-align: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .ticket-logo {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .ticket-brand { 
+    font-size: 28px; 
+    font-weight: 800; 
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+  
+  .ticket-number { 
+    font-size: 100px; 
+    font-weight: 900; 
+    margin: 8px 0;
+    letter-spacing: -0.05em;
+    background: linear-gradient(to right, #333, #000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .ticket-date { 
+    font-size: 14px; 
+    margin-bottom: 8px;
     color: #555;
+    font-weight: 500;
+  }
+  
+  .ticket-time { 
+    font-size: 14px; 
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
   }
 
   @keyframes pop-in {
     0% {
-      transform: scale(0.5);
+      transform: scale(0.3) translateY(50px);
       opacity: 0;
     }
     100% {
-      transform: scale(1);
+      transform: scale(1) translateY(0);
       opacity: 1;
     }
-  }
-
-  .instruction-box {
-    font-family: "Poppins", sans-serif;
-    text-align: center;
-    border-radius: 1rem;
-    padding: 1.5rem 2rem;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    background-color: #fff;
-    color: #000;
-  }
-  .instruction-box h2 {
-    color: #e74c3c;
-  }
-
-  .ticket-content {
-    padding: 2rem 3rem;
-    border-radius: 1rem;
-    text-align: center;
-    font-family: monospace, sans-serif;
-    animation: pop-in 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .ticket-logo {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 0.5rem;
   }
 </style>

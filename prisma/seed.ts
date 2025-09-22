@@ -38,18 +38,6 @@ export default async function seed() {
     create: { code: 'DESAINER', name: 'Layanan Desainer', ticketPrefix: 'RZD' },
   })
 
-  const kasir = await prisma.queue.upsert({
-    where: { code: 'KASIR' },
-    update: {},
-    create: { code: 'KASIR', name: 'Layanan Kasir', ticketPrefix: 'RZK' },
-  })
-
-  const pengambilan = await prisma.queue.upsert({
-    where: { code: 'PENGAMBILAN' },
-    update: {},
-    create: { code: 'PENGAMBILAN', name: 'Layanan Pengambilan', ticketPrefix: 'RZS' },
-  })
-
   // --- USERS / LOKET ---
   const hashedUserPassword = await bcrypt.hash('user123', 10)
 
@@ -71,49 +59,11 @@ export default async function seed() {
     })
   }
 
-  // Loket Kasir K-01 … K-03
-  for (let i = 1; i <= 3; i++) {
-    const code = `K-${i.toString().padStart(2, '0')}`
-    const email = `k${i.toString().padStart(2, '0')}@rizaputra.com`
-    await prisma.user.upsert({
-      where: { email }, // ✅
-      update: {},
-      create: {
-        name: `Loket ${code}`,
-        code,
-        email,
-        password: hashedUserPassword,
-        role: 'user',
-        queueId: kasir.id,
-      },
-    })
-  }
-
-  // Loket Pengambilan S-01 … S-02
-  for (let i = 1; i <= 2; i++) {
-    const code = `S-${i.toString().padStart(2, '0')}`
-    const email = `s${i.toString().padStart(2, '0')}@rizaputra.com`
-    await prisma.user.upsert({
-      where: { email }, // ✅
-      update: {},
-      create: {
-        name: `Loket ${code}`,
-        code,
-        email,
-        password: hashedUserPassword,
-        role: 'user',
-        queueId: pengambilan.id,
-      },
-    })
-  }
-
   // --- DailySequence --- (untuk nomor tiket per hari)
   const today = new Date()
   await prisma.dailySequence.createMany({
     data: [
       { queueId: desainer.id, date: today, nextSeq: 1 },
-      { queueId: kasir.id, date: today, nextSeq: 1 },
-      { queueId: pengambilan.id, date: today, nextSeq: 1 },
     ],
   })
 

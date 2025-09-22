@@ -41,7 +41,11 @@ export function startWebSocket(server?: Server): WebSocketServer {
 
 // 🔹 Helper: ambil data antrian + format payload
 async function buildQueuesPayload() {
+    // Filter hanya layanan DESAINER
     const queues = await prisma.queue.findMany({
+        where: {
+            code: 'DESAINER'
+        },
         include: {
             users: true,
             tickets: {
