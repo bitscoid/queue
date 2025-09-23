@@ -50,7 +50,8 @@ export const load: PageServerLoad = async ({ locals }) => {
       tickets: queueForUser.tickets.map(t => ({
         id: t.id,
         fullNumber: t.fullNumber,
-        status: t.status
+        status: t.status,
+        servedByUserId: t.servedByUserId // Include servedByUserId
       }))
     },
     allTickets: queueForAll.tickets.map(t => ({

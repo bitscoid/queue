@@ -43,6 +43,11 @@ export function startWebSocket(server?: Server): WebSocketServer {
                 console.error("Error processing WebSocket message:", err);
             }
         });
+        
+        // Log when client disconnects
+        ws.on("close", () => {
+            console.log("📡 Client disconnected");
+        });
     });
 
     // ✅ Daftarkan middleware Prisma 6.x
@@ -158,12 +163,21 @@ async function sendQueues(ws: WebSocket) {
 // 🔹 Helper: kirim update ke semua client
 export async function broadcastUpdate() {
     if (globalThis.wss && globalThis.buildQueuesPayload) {
-        const payload = await globalThis.buildQueuesPayload();
-        globalThis.wss.clients.forEach((client: any) => {
-            if (client.readyState === client.OPEN) {
-                client.send(JSON.stringify(payload));
-            }
-        });
+        try {
+            const payload = await globalThis.buildQueuesPayload();
+            let clientCount = 0;
+            globalThis.wss.clients.forEach((client: any) => {
+                if (client.readyState === client.OPEN) {
+                    client.send(JSON.stringify(payload));
+                    clientCount++;
+                }
+            });
+            console.log(`📡 Broadcasted update to ${clientCount} clients`);
+        } catch (error) {
+            console.error("Error broadcasting update:", error);
+        }
+    } else {
+        console.log("📡 No clients to broadcast to or buildQueuesPayload not available");
     }
 }
 
@@ -207,10 +221,13 @@ export async function broadcastTicketCall(ticket: any, queue: any) {
             timestamp: new Date().toISOString()
         };
         
+        let clientCount = 0;
         globalThis.wss.clients.forEach((client: any) => {
             if (client.readyState === client.OPEN) {
                 client.send(JSON.stringify(payload));
+                clientCount++;
             }
         });
+        console.log(`📢 Broadcasted ticket call to ${clientCount} clients`);
     }
 }

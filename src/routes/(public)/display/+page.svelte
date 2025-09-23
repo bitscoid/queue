@@ -38,6 +38,13 @@
     code: string;
   };
 
+  type TicketNotification = {
+    ticket: string;
+    queue: string;
+    operator?: Operator;
+    status: string;
+  };
+
   const queues = writable<Queue[]>([]);
   const settings = writable<Settings>({ appName: "Riza Antrian", appDesc: "Sistem Manajemen Antrian Digital" });
   const currentTime = writable<string>(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -47,7 +54,7 @@
     month: 'long', 
     year: 'numeric' 
   }));
-  const lastCalledTicket = writable<{ticket: string, queue: string, operator?: Operator} | null>(null);
+  const lastCalledTicket = writable<TicketNotification | null>(null);
 
   let ws: WebSocket | null = null;
   let interval: number | undefined = undefined;
@@ -91,22 +98,31 @@
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log("Display received WebSocket message:", data);
         
         // Handle ticket call notifications
         if (data.type === "TICKET_CALL") {
-          lastCalledTicket.set({
-            ticket: data.ticket.fullNumber,
-            queue: data.queue.name,
-            operator: data.operator // Include operator info if available
-          });
-          
-          // Clear the notification after 10 seconds
-          setTimeout(() => {
+          // Only show notification for certain statuses
+          if (data.ticket.status !== "COMPLETED" && data.ticket.status !== "SKIPPED") {
+            lastCalledTicket.set({
+              ticket: data.ticket.fullNumber,
+              queue: data.queue.name,
+              operator: data.operator, // Include operator info if available
+              status: data.ticket.status // Include ticket status
+            });
+            
+            // Clear the notification after 10 seconds
+            setTimeout(() => {
+              lastCalledTicket.set(null);
+            }, 10000);
+          } else {
+            // For completed or skipped tickets, clear any existing notification
             lastCalledTicket.set(null);
-          }, 10000);
+          }
         }
         // Handle queue updates
         else if (data.queues) {
+          console.log("Display updating queues data");
           // Update queues data
           queues.set(
             data.queues.map((q: any) => ({
@@ -259,10 +275,34 @@
   {#if $lastCalledTicket}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 animate-fade-in">
       <div class="text-center p-8 rounded-2xl bg-gradient-to-br from-green-600 to-emerald-700 shadow-2xl max-w-4xl w-full mx-4">
-        <div class="text-2xl md:text-3xl font-bold text-white mb-4">NOMOR ANTRIAN</div>
+        <div class="text-2xl md:text-3xl font-bold text-white mb-4">
+          {#if $lastCalledTicket.status === "CALLED"}
+            NOMOR ANTRIAN
+          {:else if $lastCalledTicket.status === "SERVING"}
+            NOMOR ANTRIAN
+          {:else if $lastCalledTicket.status === "CALLED"}
+            PANGGILAN ULANG ANTRIAN
+          {:else if $lastCalledTicket.status === "SKIPPED"}
+            ANTRIAN DILEWATKAN
+          {:else}
+            STATUS ANTRIAN
+          {/if}
+        </div>
         <div class="text-7xl md:text-9xl font-bold text-white my-6 animate-pulse">{$lastCalledTicket.ticket}</div>
         {#if $lastCalledTicket.operator}
-        <div class="text-2xl md:text-3xl text-white mt-4">SILAHKAN MENUJU KE {$lastCalledTicket.operator.name}</div>
+          <div class="text-2xl md:text-3xl text-white mt-4">
+            {#if $lastCalledTicket.status === "CALLED"}
+              SILAHKAN MENUJU KE {$lastCalledTicket.operator.name}
+            {:else if $lastCalledTicket.status === "SERVING"}
+              SEDANG DITANGANI OLEH {$lastCalledTicket.operator.name}
+            {:else if $lastCalledTicket.status === "CALLED"}
+              SILAHKAN MENUJU KE {$lastCalledTicket.operator.name}
+            {:else if $lastCalledTicket.status === "SKIPPED"}
+              ANTRIAN DILEWATKAN OLEH {$lastCalledTicket.operator.name}
+            {:else}
+              DITANGANI OLEH {$lastCalledTicket.operator.name}
+            {/if}
+          </div>
         {/if}
       </div>
     </div>
@@ -410,15 +450,19 @@
   }
   
   :global(.animate-pulse) {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   
   @keyframes pulse {
     0%, 100% {
+      transform: scale(1);
       opacity: 1;
+      text-shadow: 0 0 8px currentColor;
     }
     50% {
-      opacity: 0.8;
+      transform: scale(1.05);
+      opacity: 0.7;
+      text-shadow: 0 0 16px currentColor;
     }
   }
   

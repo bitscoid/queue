@@ -28,7 +28,10 @@
   $: pendingTickets = allTickets.filter((t: any) => t.status === "PENDING");
 
   // Ambil tiket yang sedang dipanggil atau ditangani berdasarkan queue.tickets (filtered for current user)
-  $: servingTickets = queue.tickets.filter((t: any) => t.status === "CALLED" || t.status === "SERVING");
+  $: servingTickets = queue.tickets.filter((t: any) => 
+    (t.status === "CALLED" || t.status === "SERVING") && 
+    t.servedByUserId === currentUserId
+  );
   
   // Pastikan hanya 1 tiket yang ditampilkan dalam servingTickets
   $: displayedServingTickets = servingTickets.length > 0 ? [servingTickets[0]] : [];
@@ -53,6 +56,7 @@
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log("Received WebSocket message:", data);
         if (data.type === "TICKET_CALL") {
           // Handle ticket call notifications
           if (data.queue.id === queue.id) {
@@ -60,24 +64,26 @@
             playNotificationSound();
           }
         } else if (data.queues) {
+          console.log("Updating queue data");
           // Find our queue in the updated data
           const updatedQueue = data.queues.find((q: any) => q.id === queue.id);
           if (updatedQueue) {
-            // For regular users, we should only update if the tickets are relevant to them
-            // Admins can see all tickets, so they get the full update
-            if (isAdmin) {
-              queue.tickets = updatedQueue.tickets || queue.tickets;
-            } else {
-              // For regular users, we need to filter tickets to only show those associated with them
-              // But we also need to handle the case where a new ticket is assigned to them
-              const relevantTickets = (updatedQueue.tickets || queue.tickets).filter(
-                (t: any) => t.servedByUserId === currentUserId
-              );
-              queue.tickets = relevantTickets;
-            }
+            console.log("Found updated queue:", updatedQueue);
+            // Update queue tickets with all tickets from the updated queue
+            // This ensures we get all relevant tickets regardless of user assignment
+            queue.tickets = (updatedQueue.tickets || queue.tickets).map(t => ({
+              id: t.id,
+              fullNumber: t.fullNumber,
+              status: t.status,
+              servedByUserId: t.servedByUserId
+            }));
             
             // Update allTickets for statistics and waiting queue
-            allTickets = updatedQueue.tickets || allTickets;
+            allTickets = (updatedQueue.tickets || allTickets).map(t => ({
+              id: t.id,
+              fullNumber: t.fullNumber,
+              status: t.status
+            }));
           }
         }
       } catch (err) {
@@ -149,11 +155,20 @@
       if (res.ok) {
         const updatedTicket = await res.json();
         queue.tickets = queue.tickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status,
+            servedByUserId: updatedTicket.servedByUserId
+          } : t
         );
         // Also update allTickets to keep statistics in sync
         allTickets = allTickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status
+          } : t
         );
         showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} mulai dilayani`, "success");
       } else {
@@ -170,7 +185,7 @@
   async function callNext() {
     // Cek apakah sudah ada tiket yang sedang ditangani
     if (servingTickets.length > 0) {
-      showNotificationMessage("Peringatan", "Masih ada tiket yang sedang ditangani. Selesaikan terlebih dahulu.", "warning");
+      showNotificationMessage("Peringatan", "Masih ada tiket yang sedang ditangani. Selesaikan terlebih dahulu.", "error");
       return;
     }
 
@@ -189,11 +204,20 @@
       if (res.ok) {
         const updatedTicket = await res.json();
         queue.tickets = queue.tickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status,
+            servedByUserId: updatedTicket.servedByUserId
+          } : t
         );
         // Also update allTickets to keep statistics in sync
         allTickets = allTickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status
+          } : t
         );
         showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} dipanggil`, "success");
         playNotificationSound();
@@ -217,11 +241,20 @@
       if (res.ok) {
         const updatedTicket = await res.json();
         queue.tickets = queue.tickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status,
+            servedByUserId: updatedTicket.servedByUserId
+          } : t
         );
         // Also update allTickets to keep statistics in sync
         allTickets = allTickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status
+          } : t
         );
         showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} selesai`, "success");
         
@@ -251,11 +284,20 @@
       if (res.ok) {
         const updatedTicket = await res.json();
         queue.tickets = queue.tickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status,
+            servedByUserId: updatedTicket.servedByUserId
+          } : t
         );
         // Also update allTickets to keep statistics in sync
         allTickets = allTickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status
+          } : t
         );
         showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} dilewatkan`, "success");
         
@@ -285,11 +327,20 @@
       if (res.ok) {
         const updatedTicket = await res.json();
         queue.tickets = queue.tickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status,
+            servedByUserId: updatedTicket.servedByUserId
+          } : t
         );
         // Also update allTickets to keep statistics in sync
         allTickets = allTickets.map((t: any) =>
-          t.id === updatedTicket.id ? updatedTicket : t
+          t.id === updatedTicket.id ? {
+            id: updatedTicket.id,
+            fullNumber: updatedTicket.fullNumber,
+            status: updatedTicket.status
+          } : t
         );
         showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} dipanggil ulang`, "info");
         playNotificationSound();
@@ -315,7 +366,19 @@
       
       if (res.ok) {
         const updatedQueue = await res.json();
-        queue = updatedQueue;
+        // Update queue with proper mapping
+        queue = {
+          id: updatedQueue.id,
+          code: updatedQueue.code,
+          name: updatedQueue.name,
+          ticketPrefix: updatedQueue.ticketPrefix,
+          tickets: updatedQueue.tickets.map((t: any) => ({
+            id: t.id,
+            fullNumber: t.fullNumber,
+            status: t.status,
+            servedByUserId: t.servedByUserId
+          }))
+        };
         showNotificationMessage("Berhasil", "Data diperbarui", "success");
       } else {
         showNotificationMessage("Gagal", "Gagal memperbarui data", "error");

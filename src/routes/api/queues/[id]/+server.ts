@@ -31,7 +31,8 @@ export const GET: RequestHandler = async ({ params }) => {
             tickets: queue.tickets.map(t => ({
                 id: t.id,
                 fullNumber: t.fullNumber,
-                status: t.status
+                status: t.status,
+                servedByUserId: t.servedByUserId
             }))
         });
     } catch (err) {

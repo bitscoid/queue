@@ -2,6 +2,7 @@
 import type { RequestHandler } from "./$types";
 import prisma from '$lib/server/prisma';
 import { startOfDay } from '$lib/client/utils/date';
+import { broadcastUpdate } from '$lib/server/websocket';
 
 export const GET: RequestHandler = async () => {
     try {
@@ -66,6 +67,9 @@ export const POST: RequestHandler = async ({ request }) => {
                 date: now,
             },
         });
+
+        // Broadcast update to all connected clients
+        await broadcastUpdate();
 
         return new Response(JSON.stringify(ticket), { status: 201 });
     } catch (err) {

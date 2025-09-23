@@ -2,7 +2,7 @@
 import type { RequestHandler } from './$types';
 import { json, error } from '@sveltejs/kit';
 import prisma from '$lib/server/prisma';
-import { broadcastTicketCall } from '$lib/server/websocket';
+import { broadcastTicketCall, broadcastUpdate } from '$lib/server/websocket';
 
 export const POST: RequestHandler = async ({ params, locals }) => {
     const id = Number(params.id);
@@ -36,6 +36,9 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 
         // Broadcast the ticket call event via WebSocket
         await broadcastTicketCall(updatedTicket, updatedTicket.queue);
+        
+        // Also broadcast the full queue update to ensure all clients have the latest data
+        await broadcastUpdate();
 
         return json(updatedTicket);
     } catch (err: any) {
