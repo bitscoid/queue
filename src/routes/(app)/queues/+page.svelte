@@ -15,9 +15,10 @@
   export let data: {
     queues: Queue[];
     isAdmin: boolean;
+    userQueueId: number | null;
   };
 
-  const { queues: initialQueues, isAdmin } = data;
+  const { queues: initialQueues, isAdmin, userQueueId } = data;
 
   let queues = [...initialQueues];
   let searchKeyword = "";
@@ -210,16 +211,28 @@
   });
 
   $: paginatedQueues = paginate(sortedQueues, currentPage, pageSize);
+  
+  // Helper function to check if a queue is assigned to the current user
+  function isUserQueue(queueId: number) {
+    return userQueueId === queueId;
+  }
 </script>
 
-<DefaultLayout title="Queues">
+<DefaultLayout title="Daftar Loket">
   <PageHeader
-    title="Queues"
-    icon="🎫"
+    title="Daftar Loket"
+    icon="📋"
     showAddButton={isAdmin}
-    addLabel="Tambah"
+    addLabel="Tambah Loket"
     onAdd={openAddModal}
   />
+
+  {#if !isAdmin}
+    <div class="alert alert-info mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span>Anda hanya dapat melihat loket yang ditugaskan kepada Anda. Hubungi administrator jika Anda memerlukan akses ke loket lain.</span>
+    </div>
+  {/if}
 
   <TableToolbar on:search={(e) => handleSearch(e.detail)} />
 
@@ -231,6 +244,7 @@
     {sortDirection}
     onSort={toggleSort}
     {isAdmin}
+    {userQueueId}
   />
 
   <Pagination

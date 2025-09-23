@@ -25,9 +25,9 @@ export default async function seed() {
     update: {},
     create: {
       id: 1,
-      name: 'BITS Project',
-      description: 'Aplikasi Startup untuk mengelola proyek dan tim.',
-      logo: '/uploads/placeholder.png',
+      name: 'Riza Putra',
+      description: 'Aplikasi Antrian Percetakan Riza Putra.',
+      logo: '/uploads/1758527902638-7bdf387a-a924-48be-8154-23a247167de5.png',
     },
   })
 
@@ -35,21 +35,21 @@ export default async function seed() {
   const desainer = await prisma.queue.upsert({
     where: { code: 'DESAINER' },
     update: {},
-    create: { code: 'DESAINER', name: 'Layanan Desainer', ticketPrefix: 'RZD' },
+    create: { code: 'DESAINER', name: 'Layanan Desainer', ticketPrefix: 'D' },
   })
 
   // --- USERS / LOKET ---
   const hashedUserPassword = await bcrypt.hash('user123', 10)
 
-  // Loket Desainer D-01 … D-06
+  // Loket Desainer PC-1 … PC-6
   for (let i = 1; i <= 6; i++) {
-    const code = `D-${i.toString().padStart(2, '0')}`
-    const email = `d${i.toString().padStart(2, '0')}@rizaputra.com`
+    const code = `PC-${i.toString()}`
+    const email = `pc${i.toString()}@rizaputra.com`
     await prisma.user.upsert({
       where: { email }, // ✅ pakai email karena unique
       update: {},
       create: {
-        name: `Loket ${code}`,
+        name: `${code}`,
         code,
         email,
         password: hashedUserPassword,

@@ -119,7 +119,7 @@
             margin-bottom: 2px; 
           }
           .ticket-number { 
-            font-size: 92px; 
+            font-size: 128px; 
             font-weight: bold; 
             margin: 1px 0; 
           }
@@ -343,7 +343,7 @@
     margin-bottom: 2px; 
   }
   .ticket-number { 
-    font-size: 92px; 
+    font-size: 128px; 
     font-weight: bold; 
     margin: 1px 0; 
   }
@@ -387,7 +387,7 @@
     margin: 8px 0;
     letter-spacing: -0.05em;
     background: linear-gradient(to right, #333, #000);
-    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   

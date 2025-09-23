@@ -12,13 +12,19 @@
   export let onSort: (key: keyof Queue) => void;
 
   export let isAdmin: boolean = false;
+  export let userQueueId: number | null = null;
+  
+  // Helper function to check if a queue is assigned to the current user
+  function isUserQueue(queueId: number) {
+    return userQueueId === queueId;
+  }
 </script>
 
 <div
-  class="overflow-x-auto rounded-xl shadow border border-base-200 bg-base-100"
+  class="overflow-x-auto rounded-xl shadow border border-base-200"
 >
   <table class="table w-full min-w-[700px] text-sm">
-    <thead class="bg-base-100 text-base-content">
+    <thead class="text-base-content">
       <tr>
         <th class="cursor-pointer" on:click={() => onSort("code")}>
           <div class="flex items-center gap-1">
@@ -58,6 +64,12 @@
             {/if}
           </div>
         </th>
+        
+        {@debug userQueueId}
+        {#if !isAdmin}
+          <th>Assigned</th>
+        {/if}
+        
         {#if isAdmin}
           <th class="text-right pr-4">Actions</th>
         {/if}
@@ -66,10 +78,17 @@
 
     <tbody>
       {#each queues as queue}
-        <tr class="hover:bg-base-100 transition">
+        <tr class="transition">
           <td>{queue.code}</td>
           <td>{queue.name}</td>
           <td>{queue.ticketPrefix}</td>
+          {#if !isAdmin}
+            <td>
+              {#if isUserQueue(queue.id)}
+                <span class="badge badge-success">Assigned</span>
+              {/if}
+            </td>
+          {/if}
           {#if isAdmin}
             <td class="text-right space-x-2 whitespace-nowrap">
               <IconButton

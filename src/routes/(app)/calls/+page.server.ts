@@ -9,12 +9,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 
   if (!user.queueId) throw redirect(302, '/queues'); // user belum punya queue
 
-  const queue = await prisma.queue.findUnique({
+  // Get the queue with tickets filtered for the current user (for calls)
+  const queueForUser = await prisma.queue.findUnique({
     where: { id: user.queueId },
     include: {
       tickets: {
         where: {
-          status: { in: ['PENDING', 'SERVING'] },
+          // Filter tickets by the current user (operator)
+          servedByUserId: user.id,
+          status: { in: ['PENDING', 'SERVING', 'CALLED'] },
           date: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } // tiket hari ini
         },
         orderBy: { seqNumber: 'asc' }
@@ -22,21 +25,42 @@ export const load: PageServerLoad = async ({ locals }) => {
     }
   });
 
-  if (!queue) throw redirect(302, '/queues');
+  // Get the queue with all tickets (for statistics and waiting queue)
+  const queueForAll = await prisma.queue.findUnique({
+    where: { id: user.queueId },
+    include: {
+      tickets: {
+        where: {
+          status: { in: ['PENDING', 'SERVING', 'CALLED'] },
+          date: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } // tiket hari ini
+        },
+        orderBy: { seqNumber: 'asc' }
+      }
+    }
+  });
+
+  if (!queueForUser || !queueForAll) throw redirect(302, '/queues');
 
   return {
     queue: {
-      id: queue.id,
-      code: queue.code,
-      name: queue.name,
-      ticketPrefix: queue.ticketPrefix,
-      tickets: queue.tickets.map(t => ({
+      id: queueForUser.id,
+      code: queueForUser.code,
+      name: queueForUser.name,
+      ticketPrefix: queueForUser.ticketPrefix,
+      tickets: queueForUser.tickets.map(t => ({
         id: t.id,
         fullNumber: t.fullNumber,
         status: t.status
       }))
     },
+    allTickets: queueForAll.tickets.map(t => ({
+      id: t.id,
+      fullNumber: t.fullNumber,
+      status: t.status
+    })),
     currentUserId: user.id,
+    userName: user.name,
+    userCode: user.code,
     isAdmin: user.role === 'admin'
   };
 };

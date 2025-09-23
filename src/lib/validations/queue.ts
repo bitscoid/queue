@@ -8,7 +8,7 @@ export const queueSchema = z.object({
         .min(2, "Kode queue minimal 2 karakter")
         .max(20, "Kode queue maksimal 20 karakter")
         .regex(/^[A-Z0-9_-]+$/, "Kode hanya boleh huruf besar, angka, _ atau -"),
-    name: z.string().min(2, "Nama queue minimal 2 karakter"),
+    name: z.string().min(1, "Nama queue minimal 1 karakter"),
     ticketPrefix: z
         .string()
         .min(1, "Ticket prefix minimal 1 karakter")

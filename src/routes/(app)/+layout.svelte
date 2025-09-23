@@ -12,12 +12,12 @@
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "🏠" },
-    { href: "/calls", label: "Calls", icon: "🎫" },
-    { href: "/queues", label: "Queues", icon: "🎫" },
-    { href: "/tickets", label: "Tickets", icon: "🎫" },
-    { href: "/users", label: "Users", icon: "👤" },
+    { href: "/calls", label: "Panggil Antrian", icon: "🎫" },
+    { href: "/queues", label: "Daftar Loket", icon: "📋" },
+    { href: "/tickets", label: "Tiket", icon: "📄" },
+    { href: "/users", label: "Pengguna", icon: "👤" },
     { href: "/token", label: "API Keys", icon: "🔑" },
-    { href: "/settings", label: "Settings", icon: "⚙️" },
+    { href: "/settings", label: "Pengaturan", icon: "⚙️" },
   ];
 
   let showMobileMenu = false;

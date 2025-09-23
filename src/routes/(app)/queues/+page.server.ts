@@ -52,5 +52,6 @@ export const load: PageServerLoad = async (event) => {
     queues: queuesList,
     isAdmin,
     currentUserId: user.id,
+    userQueueId: user.queueId
   };
 };

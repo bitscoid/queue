@@ -1,13 +1,7 @@
 import { z } from "zod";
 
 export const userSchema = z.object({
-    code: z.preprocess(
-        (val) => (val === "" ? null : val),
-        z.union([
-            z.string().regex(/^[A-Z]-\d{2}$/, "Format kode tidak valid, contoh: D-01"),
-            z.null(),
-        ])
-    ).optional(),
+    code: z.string().min(1, "Kode wajib diisi"),
     name: z.string().min(1, "Nama wajib diisi"),
     email: z
         .string()
