@@ -19,6 +19,9 @@ export const GET: RequestHandler = async (event) => {
   if (!token) throw new Error("Token tidak ditemukan");
 
   const user = event.locals.user;
+  if (!user) {
+    throw new Error("User is required");
+  }
   if (!isAdmin(event) && token.createdBy !== user.id) {
     throw new Error("Tidak diizinkan");
   }
@@ -37,6 +40,9 @@ export const PUT: RequestHandler = async (event) => {
   if (!token) throw new Error("Token tidak ditemukan");
 
   const user = event.locals.user;
+  if (!user) {
+    throw new Error("User is required");
+  }
   if (!isAdmin(event) && token.createdBy !== user.id) {
     throw new Error("Tidak diizinkan");
   }
@@ -69,6 +75,9 @@ export const DELETE: RequestHandler = async (event) => {
   if (!token) throw new Error("Token tidak ditemukan");
 
   const user = event.locals.user;
+  if (!user) {
+    throw new Error("User is required");
+  }
   if (!isAdmin(event) && token.createdBy !== user.id) {
     throw new Error("Tidak diizinkan");
   }

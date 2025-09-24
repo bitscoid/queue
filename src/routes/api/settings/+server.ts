@@ -13,8 +13,9 @@ export const GET: RequestHandler = async () => {
   return json(setting);
 };
 
-export const POST: RequestHandler = async ({ request, locals }) => {
-  requireAdmin({ request, locals });
+export const POST: RequestHandler = async (event) => {
+  const { request } = event;
+  requireAdmin(event);
 
   const formData = await request.formData();
 

@@ -3,8 +3,8 @@ declare global {
   namespace App {
     interface Locals {
       user?: {
-        code: unknown;
-        queueId: never;
+        code: string | null;
+        queueId: number | null;
         id: number;
         name: string;
         email: string | null;
@@ -25,6 +25,8 @@ declare global {
           role: "admin" | "user";
           photo: string;
           createdAt: Date;
+          code: string | null;
+          queueId: number | null;
         };
       };
     }

@@ -8,10 +8,10 @@
     type Setting,
   } from "$lib/client/services/setting.client";
   import type { Queue } from "$lib/client/stores/queue.store";
-  import type { Ticket } from "$lib/types";
+  import type { TicketDisplay } from "$lib/types";
 
   let queues: Queue[] = [];
-  let lastTicket: Ticket | null = null;
+  let lastTicket: TicketDisplay | null = null;
   let showTicket = false;
 
   let setting: Setting = {

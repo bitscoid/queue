@@ -17,6 +17,9 @@ export const GET: RequestHandler = async (event) => {
   if (isAdmin(event)) {
     tokens = await getAllKeys();
   } else {
+    if (!user) {
+      throw new Error("User is required");
+    }
     tokens = await getKeysByUserId(user.id);
   }
 
@@ -28,6 +31,10 @@ export const POST: RequestHandler = async (event) => {
 
   const user = event.locals.user;
   const body = await event.request.json();
+
+  if (!user) {
+    return json({ error: "User is required" }, { status: 401 });
+  }
 
   // ✅ Validasi dengan Zod
   const parsed = tokenSchema.safeParse({

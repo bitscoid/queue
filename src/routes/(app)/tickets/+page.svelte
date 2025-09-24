@@ -149,7 +149,7 @@
         const newTicket = await createTicket(payload.queueId);
 
         // normalisasi dan pastikan queueName langsung ada
-        const ticketDisplay = normalizeTicket(newTicket);
+        const ticketDisplay = newTicket;
 
         // assign ulang array untuk reaktivitas
         tickets = [...tickets, ticketDisplay];
@@ -163,7 +163,7 @@
         const updated = await updateTicket(selectedTicket.id, {
           status: payload.status,
         });
-        const updatedDisplay = normalizeTicket(updated);
+        const updatedDisplay = updated;
 
         // assign ulang array
         tickets = tickets.map((t) =>

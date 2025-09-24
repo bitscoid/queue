@@ -43,8 +43,8 @@
       {isEditMode ? 'Edit API Token' : 'Tambah API Token'}
     </h2>
 
-    <FormInput label="Nama Token" bind:value={name} required />
-    <FormInput label="Token" bind:value={token} />
+    <FormInput id="name" label="Nama Token" bind:value={name} required />
+    <FormInput id="token" label="Token" bind:value={token} />
 
     <div class="flex justify-center gap-4 mt-6">
       <Button type="submit" className="btn-primary" {loading}>

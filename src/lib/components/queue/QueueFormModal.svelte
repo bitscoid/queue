@@ -47,9 +47,9 @@
     </h2>
 
     <div class="space-y-4">
-      <FormInput label="Kode" bind:value={code} required />
-      <FormInput label="Nama" bind:value={name} required />
-      <FormInput label="Ticket Prefix" bind:value={ticketPrefix} required />
+      <FormInput id="code" label="Kode" bind:value={code} required />
+      <FormInput id="name" label="Nama" bind:value={name} required />
+      <FormInput id="ticketPrefix" label="Ticket Prefix" bind:value={ticketPrefix} required />
     </div>
 
     <div class="flex justify-center gap-4 mt-8">

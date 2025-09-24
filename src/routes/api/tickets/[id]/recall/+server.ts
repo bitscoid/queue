@@ -47,9 +47,10 @@ export const POST: RequestHandler = async ({ params, locals }) => {
       err &&
       typeof err === "object" &&
       "status" in err &&
-      err.status === 403
+      "message" in err &&
+      (err as { status: number }).status === 403
     ) {
-      throw error(403, (err as Error).message);
+      throw error(403, (err as { message: string }).message);
     }
     throw error(500, "Failed to recall ticket");
   }

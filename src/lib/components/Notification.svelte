@@ -6,17 +6,21 @@
   export let type: "info" | "success" | "warning" | "error" = "info";
   export let duration = 5000;
 
-  let timeoutId: number;
+  let timeoutId: number | ReturnType<typeof setTimeout> | null = null;
 
   $: if (isVisible) {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     timeoutId = setTimeout(() => {
       isVisible = false;
     }, duration);
   }
 
   onDestroy(() => {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   });
 </script>
 

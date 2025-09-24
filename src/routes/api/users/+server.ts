@@ -36,13 +36,21 @@ export const POST: RequestHandler = async (event) => {
 
   const data = parsed.data;
 
-  const existing = await getUserByEmail(data.email);
-  if (existing) {
-    return json({ message: "Email sudah terdaftar" }, { status: 400 });
+  // Handle nullable email from schema to ensure proper validation
+  const userData = {
+    ...data,
+    email: data.email || undefined,
+  };
+
+  if (userData.email) {
+    const existing = await getUserByEmail(userData.email);
+    if (existing) {
+      return json({ message: "Email sudah terdaftar" }, { status: 400 });
+    }
   }
 
   try {
-    const newUser = await createUser(data);
+    const newUser = await createUser(userData);
     return json(newUser);
   } catch (err) {
     console.error(err);

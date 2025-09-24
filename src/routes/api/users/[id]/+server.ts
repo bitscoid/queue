@@ -26,8 +26,14 @@ export const PUT: RequestHandler = async (event) => {
     );
   }
 
+  // Handle nullable email from form to ensure it's a valid email or undefined
+  const updateData = {
+    ...parsed.data,
+    email: parsed.data.email || undefined,
+  };
+
   try {
-    const updated = await updateUser(id, parsed.data);
+    const updated = await updateUser(id, updateData);
     return json(updated);
   } catch (err) {
     console.error(err);
