@@ -62,7 +62,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const queue = await prisma.queue.findUniqueOrThrow({
       where: { id: queueId },
     });
-    const fullNumber = `${queue.ticketPrefix}${seqNumber.toString().padStart(3, "0")}`;
+    const fullNumber = `${seqNumber}`;
 
     // Simpan ticket
     const ticket = await prisma.ticket.create({

@@ -33,7 +33,7 @@ export const load: PageServerLoad = async (event) => {
       servedByName: t.servedByUser?.name ?? "",
       fullNumber:
         t.fullNumber ??
-        `${t.queue?.ticketPrefix ?? ""}-${String(t.seqNumber).padStart(3, "0")}`,
+        `${t.seqNumber}`,
     }));
   } else {
     // User biasa, hanya ticket dari queue yang dilayani
@@ -63,7 +63,7 @@ export const load: PageServerLoad = async (event) => {
         servedByName: t.servedByUser?.name ?? "",
         fullNumber:
           t.fullNumber ??
-          `${t.queue?.ticketPrefix ?? ""}-${String(t.seqNumber).padStart(3, "0")}`,
+          `${t.seqNumber}`,
       }));
     }
   }

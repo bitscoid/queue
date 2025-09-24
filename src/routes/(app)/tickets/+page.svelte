@@ -64,7 +64,7 @@
       id: raw.id,
       fullNumber:
         raw.fullNumber ??
-        `${raw.queue?.ticketPrefix}-${String(raw.seqNumber).padStart(3, "0")}`,
+        `${raw.seqNumber}`,
       status: raw.status,
       date: raw.date instanceof Date ? raw.date.toISOString() : raw.date,
       createdAt:
