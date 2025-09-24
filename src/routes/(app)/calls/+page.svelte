@@ -71,8 +71,8 @@
             console.log("Found updated queue:", updatedQueue);
             // Update queue tickets - only include tickets assigned to current user
             queue.tickets = ((updatedQueue.tickets || queue.tickets)
-              .filter(t => t.servedByUserId === currentUserId) // Only tickets for current user
-              .map(t => ({
+              .filter((t: { servedByUserId: number; }) => t.servedByUserId === currentUserId) // Only tickets for current user
+              .map((t: { id: any; fullNumber: any; status: any; servedByUserId: any; }) => ({
                 id: t.id,
                 fullNumber: t.fullNumber,
                 status: t.status,
@@ -80,7 +80,7 @@
               })));
             
             // Update allTickets for statistics and waiting queue (all tickets for the queue)
-            allTickets = (updatedQueue.tickets || allTickets).map(t => ({
+            allTickets = (updatedQueue.tickets || allTickets).map((t: { id: any; fullNumber: any; status: any; }) => ({
               id: t.id,
               fullNumber: t.fullNumber,
               status: t.status
