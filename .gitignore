@@ -85,6 +85,12 @@ lerna-lock.json
 .svelte-kit/output/server
 .svelte-kit/output/server/**
 .svelte-kit/output/server/manifest.json
-/static/uploads
 build
 .eslintcache
+
+# Ignore semua isi uploads
+/static/uploads/*
+
+# Tapi keep folder audio + isinya
+!/static/uploads/audio
+!/static/uploads/audio/**
