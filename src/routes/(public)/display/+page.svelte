@@ -56,6 +56,244 @@
   }));
   const lastCalledTicket = writable<TicketNotification | null>(null);
 
+  // Audio context for notifications
+  let audioContext: AudioContext | null = null;
+
+  // Function to get audio file path for number and loket
+  function getNumberAudioPath(number: number, operatorCode?: string): string[] {
+    if (number <= 0 || number > 999) return [];
+    
+    const audioFiles: string[] = [];
+    
+    // Add "nomor-antrian" at the beginning
+    audioFiles.push("/uploads/audio/nomor-antrian.mp3");
+    
+    // Handle hundreds
+    if (number >= 100) {
+      const hundreds = Math.floor(number / 100);
+      audioFiles.push(`/uploads/audio/${getNumberWord(hundreds)}.mp3`);
+      audioFiles.push("/uploads/audio/ratus.mp3");
+      number %= 100;
+    }
+    
+    // Handle tens and ones
+    if (number >= 20) {
+      const tens = Math.floor(number / 10);
+      const ones = number % 10;
+      
+      // Handle puluhan (20, 30, 40, etc.)
+      if (ones === 0) {
+        switch(number) {
+          case 20:
+            audioFiles.push("/uploads/audio/dua.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 30:
+            audioFiles.push("/uploads/audio/tiga.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 40:
+            audioFiles.push("/uploads/audio/empat.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 50:
+            audioFiles.push("/uploads/audio/lima.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 60:
+            audioFiles.push("/uploads/audio/enam.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 70:
+            audioFiles.push("/uploads/audio/tujuh.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 80:
+            audioFiles.push("/uploads/audio/delapan.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 90:
+            audioFiles.push("/uploads/audio/sembilan.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          default:
+            audioFiles.push(`/uploads/audio/${getNumberWord(tens)}.mp3`);
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            if (ones > 0) {
+              audioFiles.push(`/uploads/audio/${getNumberWord(ones)}.mp3`);
+            }
+        }
+      } else {
+        // For numbers like 21, 22, etc. - tens part
+        switch(tens) {
+          case 2:
+            audioFiles.push("/uploads/audio/dua.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 3:
+            audioFiles.push("/uploads/audio/tiga.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 4:
+            audioFiles.push("/uploads/audio/empat.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 5:
+            audioFiles.push("/uploads/audio/lima.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 6:
+            audioFiles.push("/uploads/audio/enam.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 7:
+            audioFiles.push("/uploads/audio/tujuh.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 8:
+            audioFiles.push("/uploads/audio/delapan.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          case 9:
+            audioFiles.push("/uploads/audio/sembilan.mp3");
+            audioFiles.push("/uploads/audio/puluh.mp3");
+            break;
+          default:
+            audioFiles.push(`/uploads/audio/${getNumberWord(tens)}.mp3`);
+            audioFiles.push("/uploads/audio/puluh.mp3");
+        }
+        
+        // Then add the ones part
+        if (ones > 0) {
+          audioFiles.push(`/uploads/audio/${getNumberWord(ones)}.mp3`);
+        }
+      }
+    } else if (number > 10 && number <= 19) {
+      // Special handling for belas numbers (11-19)
+      // For numbers like 12 (dua belas), we need "dua.mp3", "belas.mp3"
+      switch(number) {
+        case 11:
+          audioFiles.push("/uploads/audio/sebelas.mp3");
+          break;
+        case 12:
+          audioFiles.push("/uploads/audio/dua.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        case 13:
+          audioFiles.push("/uploads/audio/tiga.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        case 14:
+          audioFiles.push("/uploads/audio/empat.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        case 15:
+          audioFiles.push("/uploads/audio/lima.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        case 16:
+          audioFiles.push("/uploads/audio/enam.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        case 17:
+          audioFiles.push("/uploads/audio/tujuh.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        case 18:
+          audioFiles.push("/uploads/audio/delapan.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        case 19:
+          audioFiles.push("/uploads/audio/sembilan.mp3");
+          audioFiles.push("/uploads/audio/belas.mp3");
+          break;
+        default:
+          audioFiles.push(`/uploads/audio/${getNumberWord(number)}.mp3`);
+      }
+    } else if (number === 10) {
+      audioFiles.push("/uploads/audio/sepuluh.mp3");
+    } else if (number > 0) {
+      audioFiles.push(`/uploads/audio/${getNumberWord(number)}.mp3`);
+    }
+    
+    // Add "menuju-loket" to indicate direction
+    audioFiles.push("/uploads/audio/menuju-loket.mp3");
+    
+    // Add operator loket number if available
+    if (operatorCode) {
+      // Extract number from operator code (e.g., "PC-1" -> extract "1")
+      const match = operatorCode.match(/(\d+)$/);
+      if (match) {
+        const loketNumber = parseInt(match[1], 10);
+        if (!isNaN(loketNumber)) {
+          // Add the loket number at the end
+          audioFiles.push(`/uploads/audio/${getNumberWord(loketNumber)}.mp3`);
+        } else {
+          // If extraction fails, just use the operator code as fallback
+          audioFiles.push("/uploads/audio/menuju-loket.mp3");
+        }
+      } else {
+        // Fallback if operator code doesn't have a number
+        audioFiles.push("/uploads/audio/menuju-loket.mp3");
+      }
+    }
+    
+    return audioFiles;
+  }
+
+  
+
+  // Function to play audio sequence
+  async function playAudioSequence(audioFiles: string[]): Promise<void> {
+    if (!audioFiles || audioFiles.length === 0) return;
+
+    for (const audioFile of audioFiles) {
+      try {
+        const audio = new Audio(audioFile);
+        await playAudioElement(audio);
+      } catch (error) {
+        console.error("Error playing audio:", audioFile, error);
+      }
+    }
+  }
+
+  // Helper function to play an audio element and wait for it to finish
+  function playAudioElement(audio: HTMLAudioElement): Promise<void> {
+    return new Promise((resolve) => {
+      audio.onended = () => resolve();
+      audio.onerror = () => resolve();
+      audio.play().catch((error) => {
+        console.error("Error playing audio:", error);
+        resolve();
+      });
+    });
+  }
+
+  // Helper function to get number word for single digits (for hundreds and tens)
+  function getNumberWord(num: number): string {
+    const numberMap: { [key: number]: string } = {
+      1: "satu",
+      2: "dua", 
+      3: "tiga",
+      4: "empat",
+      5: "lima",
+      6: "enam",
+      7: "tujuh",
+      8: "delapan",
+      9: "sembilan",
+      10: "sepuluh",
+      11: "sebelas"
+    };
+    
+    return numberMap[num] || "satu";
+  }
+
+  // Extract ticket number from full number (e.g., "A1" -> 1, "B23" -> 23)
+  function extractTicketNumber(fullNumber: string): number | null {
+    const match = fullNumber.match(/\d+/);
+    return match ? parseInt(match[0], 10) : null;
+  }
+
   let ws: WebSocket | null = null;
   let interval: number | undefined = undefined;
   let pingInterval: number | undefined = undefined;
@@ -78,6 +316,13 @@
     };
 
     fetchSettings();
+
+    // Initialize audio context
+    try {
+      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    } catch (e) {
+      console.warn("AudioContext not supported:", e);
+    }
 
     const wsUrl = import.meta.env.DEV 
       ? "ws://localhost:4000" 
@@ -102,8 +347,9 @@
         
         // Handle ticket call notifications
         if (data.type === "TICKET_CALL") {
-          // Only show notification for certain statuses
-          if (data.ticket.status !== "COMPLETED" && data.ticket.status !== "SKIPPED") {
+          // Play audio announcement only for CALLED and RECALLED status, not for SERVING, COMPLETED or SKIPPED
+          if (data.ticket.status === "CALLED" || data.ticket.status === "RECALLED") {
+            // Show notification for the called ticket
             lastCalledTicket.set({
               ticket: data.ticket.fullNumber,
               queue: data.queue.name,
@@ -111,12 +357,27 @@
               status: data.ticket.status // Include ticket status
             });
             
+            // Play bell sound first
+            const bellAudio = new Audio("/uploads/audio/bell.mp3");
+            bellAudio.play().catch(error => console.error("Error playing bell sound:", error));
+            
+            // Play audio announcement for the called ticket after a short delay
+            setTimeout(() => {
+              const ticketNumber = extractTicketNumber(data.ticket.fullNumber);
+              if (ticketNumber !== null) {
+                const operatorCode = data.operator?.code;
+                const audioFiles = getNumberAudioPath(ticketNumber, operatorCode);
+                playAudioSequence(audioFiles);
+              }
+            }, 300); // 300ms delay to allow bell to play first
+            
             // Clear the notification after 10 seconds
             setTimeout(() => {
               lastCalledTicket.set(null);
             }, 10000);
           } else {
-            // For completed or skipped tickets, clear any existing notification
+            // For completed, skipped or serving tickets, clear any existing notification
+            // but don't show new notification
             lastCalledTicket.set(null);
           }
         }
@@ -189,6 +450,9 @@
       }
       if (pingInterval) {
         window.clearInterval(pingInterval);
+      }
+      if (audioContext) {
+        audioContext.close();
       }
     };
   });

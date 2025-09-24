@@ -60,8 +60,7 @@
         if (data.type === "TICKET_CALL") {
           // Handle ticket call notifications - only for current operator
           if (data.queue.id === queue.id && data.ticket.servedByUserId === currentUserId) {
-            showNotificationMessage("Panggilan Tiket", `Memanggil tiket: ${data.ticket.fullNumber}`, "info");
-            playNotificationSound();
+            // Removed notification for ticket calls to avoid popup notifications
           }
         } else if (data.queues) {
           console.log("Updating queue data");
@@ -171,7 +170,7 @@
             status: updatedTicket.status
           } : t
         );
-        showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} mulai dilayani`, "success");
+        
       } else {
         const errorData = await res.json().catch(() => ({}));
         const errorMessage = errorData.message || "Error tidak diketahui";
@@ -221,7 +220,6 @@
           } : t
         );
         showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} dipanggil`, "success");
-        playNotificationSound();
       } else {
         const errorData = await res.json().catch(() => ({}));
         const errorMessage = errorData.message || "Error tidak diketahui";
@@ -257,14 +255,9 @@
             status: updatedTicket.status
           } : t
         );
-        showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} selesai`, "success");
         
-        // Setelah menyelesaikan tiket, cek jika ada antrian berikutnya yang bisa dipanggil
-        if (pendingTickets.length > 0) {
-          setTimeout(() => {
-            showNotificationMessage("Info", "Anda dapat memanggil antrian berikutnya", "info");
-          }, 2000);
-        }
+        
+        
       } else {
         const errorData = await res.json().catch(() => ({}));
         const errorMessage = errorData.message || "Error tidak diketahui";
@@ -300,14 +293,9 @@
             status: updatedTicket.status
           } : t
         );
-        showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} dilewatkan`, "success");
         
-        // Setelah melewatkan tiket, cek jika ada antrian berikutnya yang bisa dipanggil
-        if (pendingTickets.length > 0) {
-          setTimeout(() => {
-            showNotificationMessage("Info", "Anda dapat memanggil antrian berikutnya", "info");
-          }, 2000);
-        }
+        
+        
       } else {
         const errorData = await res.json().catch(() => ({}));
         const errorMessage = errorData.message || "Error tidak diketahui";
@@ -344,7 +332,6 @@
           } : t
         );
         showNotificationMessage("Berhasil", `Tiket ${updatedTicket.fullNumber} dipanggil ulang`, "info");
-        playNotificationSound();
       } else {
         const errorData = await res.json().catch(() => ({}));
         const errorMessage = errorData.message || "Error tidak diketahui";
