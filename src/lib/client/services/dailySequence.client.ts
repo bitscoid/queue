@@ -4,9 +4,9 @@ import { dailySequenceArraySchema } from "$lib/validations/dailySequence";
 import type { DailySequence } from "$lib/validations/dailySequence";
 
 export async function getSequences(queueId: number): Promise<DailySequence[]> {
-    return fetcher<DailySequence[]>(
-        `/api/queues/${queueId}/sequences`,
-        {},
-        dailySequenceArraySchema // validasi output
-    );
+  return fetcher<DailySequence[]>(
+    `/api/queues/${queueId}/sequences`,
+    {},
+    dailySequenceArraySchema, // validasi output
+  );
 }

@@ -22,22 +22,11 @@
 
 {#if isVisible}
   <div 
-    class="fixed top-4 right-4 z-50 animate-fade-in"
+    class="fixed top-4 right-4 z-50 animate-fade-in text-white px-5 py-4 rounded-xl shadow-lg border-l-4 border-white flex items-start gap-3 max-w-md"
     class:bg-blue-500={type === "info"}
     class:bg-green-500={type === "success"}
     class:bg-yellow-500={type === "warning"}
     class:bg-red-500={type === "error"}
-    class:text-white
-    class:px-5={true}
-    class:py-4={true}
-    class:rounded-xl={true}
-    class:shadow-lg={true}
-    class:border-l-4={true}
-    class:border-white={true}
-    class:flex={true}
-    class:items-start={true}
-    class:gap-3={true}
-    class:max-w-md={true}
   >
     <span class="text-2xl mt-0.5">
       {#if type === "info"} ℹ️

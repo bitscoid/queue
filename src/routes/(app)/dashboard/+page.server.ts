@@ -18,8 +18,8 @@ export async function load({ locals }) {
   // Get count of operators (users with role 'user', not 'admin')
   const totalOperators = await prisma.user.count({
     where: {
-      role: 'user'
-    }
+      role: "user",
+    },
   });
 
   // Get ticket statistics for today
@@ -34,94 +34,94 @@ export async function load({ locals }) {
     completedTickets,
     calledTickets,
     skippedTickets,
-    cancelledTickets
+    cancelledTickets,
   ] = await Promise.all([
     prisma.ticket.count({
-      where: { 
-        date: { 
+      where: {
+        date: {
           gte: todayStart,
-          lte: todayEnd
-        } 
-      }
+          lte: todayEnd,
+        },
+      },
     }),
     prisma.ticket.count({
-      where: { 
-        date: { 
+      where: {
+        date: {
           gte: todayStart,
-          lte: todayEnd
+          lte: todayEnd,
         },
-        status: "PENDING"
-      }
+        status: "PENDING",
+      },
     }),
     prisma.ticket.count({
-      where: { 
-        date: { 
+      where: {
+        date: {
           gte: todayStart,
-          lte: todayEnd
+          lte: todayEnd,
         },
-        status: "SERVING"
-      }
+        status: "SERVING",
+      },
     }),
     prisma.ticket.count({
-      where: { 
-        date: { 
+      where: {
+        date: {
           gte: todayStart,
-          lte: todayEnd
+          lte: todayEnd,
         },
-        status: "COMPLETED"
-      }
+        status: "COMPLETED",
+      },
     }),
     prisma.ticket.count({
-      where: { 
-        date: { 
+      where: {
+        date: {
           gte: todayStart,
-          lte: todayEnd
+          lte: todayEnd,
         },
-        status: "CALLED"
-      }
+        status: "CALLED",
+      },
     }),
     prisma.ticket.count({
-      where: { 
-        date: { 
+      where: {
+        date: {
           gte: todayStart,
-          lte: todayEnd
+          lte: todayEnd,
         },
-        status: "SKIPPED"
-      }
+        status: "SKIPPED",
+      },
     }),
     prisma.ticket.count({
-      where: { 
-        date: { 
+      where: {
+        date: {
           gte: todayStart,
-          lte: todayEnd
+          lte: todayEnd,
         },
-        status: "CANCELLED"
-      }
-    })
+        status: "CANCELLED",
+      },
+    }),
   ]);
 
   // Get operator statistics (only users with role 'user', not 'admin')
   const operatorStats = await prisma.user.findMany({
     where: {
-      role: 'user'  // Only include users with role 'user', exclude 'admin'
+      role: "user", // Only include users with role 'user', exclude 'admin'
     },
     include: {
       _count: {
         select: {
           tickets: {
             where: {
-              date: { 
+              date: {
                 gte: todayStart,
-                lte: todayEnd
-              }
-            }
-          }
-        }
-      }
+                lte: todayEnd,
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: {
-      name: 'asc'
-    }
+      name: "asc",
+    },
   });
 
   // Get queue statistics by queue
@@ -131,15 +131,15 @@ export async function load({ locals }) {
         select: {
           tickets: {
             where: {
-              date: { 
+              date: {
                 gte: todayStart,
-                lte: todayEnd
-              }
-            }
-          }
-        }
-      }
-    }
+                lte: todayEnd,
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
   // Get most active queue today
@@ -147,32 +147,32 @@ export async function load({ locals }) {
     where: {
       tickets: {
         some: {
-          date: { 
+          date: {
             gte: todayStart,
-            lte: todayEnd
-          }
-        }
-      }
+            lte: todayEnd,
+          },
+        },
+      },
     },
     include: {
       _count: {
         select: {
           tickets: {
             where: {
-              date: { 
+              date: {
                 gte: todayStart,
-                lte: todayEnd
-              }
-            }
-          }
-        }
-      }
+                lte: todayEnd,
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: {
       tickets: {
-        _count: 'desc'
-      }
-    }
+        _count: "desc",
+      },
+    },
   });
 
   return {

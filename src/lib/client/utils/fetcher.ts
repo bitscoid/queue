@@ -15,7 +15,7 @@ export class FetcherError extends Error {
 export async function fetcher<T>(
   url: string,
   options: RequestInit = {},
-  validator?: z.ZodSchema<T>
+  validator?: z.ZodSchema<T>,
 ): Promise<T> {
   const headers: HeadersInit = {
     ...(options.body ? { "Content-Type": "application/json" } : {}),
@@ -29,7 +29,7 @@ export async function fetcher<T>(
     throw new FetcherError(
       json.message || "Terjadi kesalahan saat memuat data",
       res.status,
-      json
+      json,
     );
   }
 
@@ -39,7 +39,7 @@ export async function fetcher<T>(
       throw new FetcherError(
         "Data response tidak valid",
         res.status,
-        parsed.error.flatten()
+        parsed.error.flatten(),
       );
     }
     return parsed.data;

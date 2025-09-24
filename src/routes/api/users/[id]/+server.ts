@@ -1,5 +1,9 @@
 import { json } from "@sveltejs/kit";
-import { updateUser, deleteUser, getUserById } from "$lib/server/services/user.service";
+import {
+  updateUser,
+  deleteUser,
+  getUserById,
+} from "$lib/server/services/user.service";
 import { requireAdmin, requireRoleOrSelf } from "$lib/server/auth";
 import type { RequestHandler } from "./$types";
 import { userUpdateSchema } from "$lib/validations/user";
@@ -18,7 +22,7 @@ export const PUT: RequestHandler = async (event) => {
         message: "Validasi gagal",
         errors: parsed.error.flatten().fieldErrors,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

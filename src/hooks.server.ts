@@ -32,7 +32,6 @@ if (!globalThis.__wsStarted) {
   globalThis.__wsStarted = true;
 }
 
-
 export const handle: Handle = async ({ event, resolve }) => {
   // 🌡️ Prisma warm-up (optional di dev)
   if (process.env.NODE_ENV !== "production") {
@@ -58,7 +57,7 @@ export const handle: Handle = async ({ event, resolve }) => {
               createdAt: true,
               photo: true,
               queueId: true,
-              code: true
+              code: true,
             },
           },
         },
@@ -97,7 +96,7 @@ export const handle: Handle = async ({ event, resolve }) => {
           createdAt: true,
           photo: true,
           queueId: true,
-          code: true
+          code: true,
         },
       });
 

@@ -76,12 +76,12 @@ export interface TicketDisplay {
   id: number;
   fullNumber: string;
   status: TicketStatus;
-  date: string;       // selalu string (ISO format) supaya aman
+  date: string; // selalu string (ISO format) supaya aman
   createdAt: string;
   updatedAt: string;
 
   queueId: number;
-  queueName: string;  // diturunkan dari relation Queue
+  queueName: string; // diturunkan dari relation Queue
   seqNumber: number;
 
   servedById?: number | null;

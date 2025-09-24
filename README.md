@@ -30,6 +30,7 @@ Sistem manajemen antrian digital lengkap berbasis web, dirancang untuk membantu 
 ### Prerequisites
 
 Pastikan Anda telah menginstall:
+
 - **Node.js** 18.0 atau lebih baru
 - **pnpm** 8.0 atau lebih baru
 - **SQLite** atau PostgreSQL database (projek menggunakan SQLite sebagai default)
@@ -37,22 +38,26 @@ Pastikan Anda telah menginstall:
 ### Installation
 
 1. **Clone repository ini:**
+
 ```bash
 git clone <your-repository-url> riza-antrian
 cd riza-antrian
 ```
 
 2. **Install dependencies:**
+
 ```bash
 pnpm install
 ```
 
 3. **Setup environment variables:**
+
 ```bash
 cp .env.example .env
 ```
 
 Edit file `.env` dan sesuaikan dengan konfigurasi Anda:
+
 ```env
 # Database Configuration (Default SQLite)
 DATABASE_URL="file:./dev.db"
@@ -66,6 +71,7 @@ APP_URL="http://localhost:5173"
 ```
 
 4. **Setup database dan jalankan aplikasi:**
+
 ```bash
 # Setup database, jalankan migrations, dan seed data
 pnpm bits
@@ -131,28 +137,31 @@ riza-antrian/
 ## 🛠️ Available Scripts
 
 ### Development Scripts
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Menjalankan development server |
-| `pnpm build` | Build aplikasi untuk production |
+
+| Command        | Description                           |
+| -------------- | ------------------------------------- |
+| `pnpm dev`     | Menjalankan development server        |
+| `pnpm build`   | Build aplikasi untuk production       |
 | `pnpm preview` | Preview production build secara lokal |
-| `pnpm lint` | Menjalankan ESLint untuk code linting |
-| `pnpm format` | Format code dengan Prettier |
-| `pnpm check` | Menjalankan type checking |
+| `pnpm lint`    | Menjalankan ESLint untuk code linting |
+| `pnpm format`  | Format code dengan Prettier           |
+| `pnpm check`   | Menjalankan type checking             |
 
 ### Database Scripts
-| Command | Description |
-|---------|-------------|
-| `pnpm bits` | Full setup: install + database migration + seed |
-| `pnpm bits:reset` | Reset database + fresh setup |
-| `pnpm bits:prod` | Production deployment setup |
-| `pnpm db:reset` | Reset database saja |
-| `pnpm seed` | Menjalankan seed data |
-| `pnpm prisma studio` | Membuka Prisma Studio GUI |
+
+| Command              | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| `pnpm bits`          | Full setup: install + database migration + seed |
+| `pnpm bits:reset`    | Reset database + fresh setup                    |
+| `pnpm bits:prod`     | Production deployment setup                     |
+| `pnpm db:reset`      | Reset database saja                             |
+| `pnpm seed`          | Menjalankan seed data                           |
+| `pnpm prisma studio` | Membuka Prisma Studio GUI                       |
 
 ## 🗄️ Database Schema
 
 ### Model User
+
 - `id`: Int @id @default(autoincrement())
 - `code`: String? @unique (kode operator untuk loket)
 - `name`: String
@@ -165,6 +174,7 @@ riza-antrian/
 - `updatedAt`: DateTime @updatedAt
 
 ### Model Queue (Layanan/Antrian)
+
 - `id`: Int @id @default(autoincrement())
 - `code`: String @unique (mis: "DESAINER", "KASIR", "PENGAMBILAN")
 - `name`: String
@@ -173,6 +183,7 @@ riza-antrian/
 - `updatedAt`: DateTime @updatedAt
 
 ### Model Ticket (Tiket/Antrian)
+
 - `id`: Int @id @default(autoincrement())
 - `queueId`: Int
 - `seqNumber`: Int (nomor urut per queue per hari)
@@ -184,6 +195,7 @@ riza-antrian/
 - `servedByUserId`: Int? (operator yang menangani)
 
 ### Model DailySequence (Pengaturan Harian)
+
 - `id`: Int @id @default(autoincrement())
 - `queueId`: Int
 - `date`: DateTime
@@ -191,12 +203,14 @@ riza-antrian/
 - `updatedAt`: DateTime @updatedAt
 
 ### Model Setting (Pengaturan Sistem)
+
 - `id`: Int @id @default(1)
 - `name`: String
 - `description`: String
 - `logo`: String?
 
 ### Model ApiToken (Token API)
+
 - `id`: Int @id @default(autoincrement())
 - `name`: String
 - `token`: String @unique
@@ -207,6 +221,7 @@ riza-antrian/
 ## 🔐 Sistem Otentikasi
 
 Aplikasi memiliki sistem otentikasi berbasis JWT:
+
 - Role: `admin` dan `user` (operator)
 - Protected route dengan middleware
 - Session management dengan cookies
@@ -215,17 +230,20 @@ Aplikasi memiliki sistem otentikasi berbasis JWT:
 ## 🎫 Sistem Antrian
 
 ### Pengambilan Tiket
+
 - Antarmuka publik untuk pengambilan nomor antrian
 - Nomor unik harian per layanan
 - Cetak otomatis tiket
 - Tampilan animasi tiket
 
 ### Manajemen Operator
+
 - Dashboard operator untuk memanggil antrian
 - Status real-time: PENDING, CALLED, SERVING, COMPLETED, SKIPPED
 - Tampilan display publik dengan animasi dan audio
 
 ### Fungsi Tiket
+
 - `call`: Panggil tiket berikutnya
 - `serve`: Mulai melayani tiket
 - `skip`: Lewati tiket saat ini
@@ -260,24 +278,29 @@ Aplikasi ini telah dirancang untuk mendukung testing, meskipun file test belum d
 ## 📦 Deployment
 
 ### Deployment ke Vercel
+
 1. **Push code ke Git repository**
 2. **Connect ke Vercel:**
    - Login ke [Vercel](https://vercel.com)
    - Import project dari Git repository
    - Configure environment variables di Vercel dashboard
 3. **Environment variables untuk Vercel:**
+
 ```env
 DATABASE_URL="your-production-database-url"
 JWT_SECRET="your-production-jwt-secret"
 ```
 
 ### Self-hosted Deployment
+
 1. **Build aplikasi:**
+
 ```bash
 pnpm build
 ```
 
 2. **Jalankan production server:**
+
 ```bash
 pnpm preview
 ```
@@ -288,16 +311,19 @@ Kontribusi sangat dipersilakan! Berikut cara untuk berkontribusi:
 
 1. **Fork project ini**
 2. **Buat feature branch:**
+
 ```bash
 git checkout -b feature/amazing-feature
 ```
 
 3. **Commit changes Anda:**
+
 ```bash
 git commit -m 'Add some amazing feature'
 ```
 
 4. **Push ke branch:**
+
 ```bash
 git push origin feature/amazing-feature
 ```
@@ -305,6 +331,7 @@ git push origin feature/amazing-feature
 5. **Buka Pull Request**
 
 ### Development Guidelines
+
 - Ikuti coding style yang sudah ada
 - Tambahkan tests untuk fitur baru
 - Update documentation sesuai kebutuhan
@@ -317,6 +344,7 @@ Distributed under the MIT License. See `LICENSE` file untuk detail lengkap.
 ## 🆓 Support
 
 Jika Anda mengalami masalah atau memiliki pertanyaan:
+
 - 🐛 **Report Bugs**: [Create Issue](https://github.com/bitscoid/queue.git/issues)
 - 💡 **Request Features**: [Feature Requests](https://github.com/bitscoid/queue.git/issues)
 - 💬 **Discussion**: [Join Discussion](https://github.com/bitscoid/queue.git/discussions)

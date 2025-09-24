@@ -1,13 +1,13 @@
 // types/api.ts
 
 import type {
-    User,
-    Queue,
-    Ticket,
-    DailySequence,
-    Setting,
-    ApiToken,
-    ApiResponse,
+  User,
+  Queue,
+  Ticket,
+  DailySequence,
+  Setting,
+  ApiToken,
+  ApiResponse,
 } from "./index";
 
 /*
@@ -18,28 +18,27 @@ import type {
 
 // ✅ Login
 export interface LoginRequest {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 export type LoginResponse = ApiResponse<{
-    user: User;
-    token: string;
+  user: User;
+  token: string;
 }>;
 
 // ✅ Register
 export interface RegisterRequest {
-    name: string;
-    email: string;
-    password: string;
+  name: string;
+  email: string;
+  password: string;
 }
 export type RegisterResponse = ApiResponse<{
-    user: User;
-    token: string;
+  user: User;
+  token: string;
 }>;
 
 // ✅ Profile (me)
 export type ProfileResponse = ApiResponse<User>;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -48,10 +47,12 @@ export type ProfileResponse = ApiResponse<User>;
 */
 export type GetUsersResponse = ApiResponse<User[]>;
 export type GetUserResponse = ApiResponse<User>;
-export type CreateUserRequest = Omit<User, "id" | "createdAt" | "updatedAt" | "tokens" | "tickets" | "queue">;
+export type CreateUserRequest = Omit<
+  User,
+  "id" | "createdAt" | "updatedAt" | "tokens" | "tickets" | "queue"
+>;
 export type UpdateUserRequest = Partial<CreateUserRequest>;
 export type DeleteUserResponse = ApiResponse<null>;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -61,14 +62,13 @@ export type DeleteUserResponse = ApiResponse<null>;
 export type GetQueuesResponse = ApiResponse<Queue[]>;
 export type GetQueueResponse = ApiResponse<Queue>;
 export interface CreateQueueRequest {
-    code: string;
-    name: string;
-    ticketPrefix: string;
+  code: string;
+  name: string;
+  ticketPrefix: string;
 }
 export type CreateQueueResponse = ApiResponse<Queue>;
 export type UpdateQueueRequest = Partial<CreateQueueRequest>;
 export type DeleteQueueResponse = ApiResponse<null>;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -78,21 +78,21 @@ export type DeleteQueueResponse = ApiResponse<null>;
 
 // Ambil tiket baru
 export interface CreateTicketRequest {
-    queueId: number;
+  queueId: number;
 }
 export type CreateTicketResponse = ApiResponse<Ticket>;
 
 // Ambil tiket berikutnya (dipanggil di loket)
 export interface NextTicketRequest {
-    queueId: number;
-    userId: number; // user loket
+  queueId: number;
+  userId: number; // user loket
 }
 export type NextTicketResponse = ApiResponse<Ticket | null>;
 
 // Update status tiket
 export interface UpdateTicketStatusRequest {
-    ticketId: number;
-    status: "CALLED" | "SERVING" | "SKIPPED" | "COMPLETED" | "CANCELLED";
+  ticketId: number;
+  status: "CALLED" | "SERVING" | "SKIPPED" | "COMPLETED" | "CANCELLED";
 }
 export type UpdateTicketStatusResponse = ApiResponse<Ticket>;
 
@@ -105,11 +105,11 @@ export type GetTodayTicketsResponse = ApiResponse<Ticket[]>;
 |--------------------------------------------------------------------------
 */
 export interface SequencesResponse {
-    success: boolean;
-    message: string;
-    data?: (DailySequence & {
-        queue: { id: number; code: string; name: string; ticketPrefix: string };
-    })[];
+  success: boolean;
+  message: string;
+  data?: (DailySequence & {
+    queue: { id: number; code: string; name: string; ticketPrefix: string };
+  })[];
 }
 
 /*
@@ -121,14 +121,13 @@ export type GetSettingResponse = ApiResponse<Setting>;
 export type UpdateSettingRequest = Partial<Setting>;
 export type UpdateSettingResponse = ApiResponse<Setting>;
 
-
 /*
 |--------------------------------------------------------------------------
 | API TOKENS
 |--------------------------------------------------------------------------
 */
 export interface CreateApiTokenRequest {
-    name: string;
+  name: string;
 }
 export type CreateApiTokenResponse = ApiResponse<ApiToken>;
 export type GetApiTokensResponse = ApiResponse<ApiToken[]>;

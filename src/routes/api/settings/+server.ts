@@ -1,19 +1,22 @@
 import { json } from "@sveltejs/kit";
-import { getSetting, updateSetting } from "$lib/server/services/setting.service";
+import {
+  getSetting,
+  updateSetting,
+} from "$lib/server/services/setting.service";
 import type { RequestHandler } from "./$types";
 import { saveFile } from "$lib/server/services/upload.service";
 import { requireAdmin } from "$lib/server/auth";
 import { settingSchema } from "$lib/validations/setting";
 
-export const GET: RequestHandler = async (event) => {
+export const GET: RequestHandler = async () => {
   const setting = await getSetting();
   return json(setting);
 };
 
-export const POST: RequestHandler = async (event) => {
-  requireAdmin(event);
+export const POST: RequestHandler = async ({ request, locals }) => {
+  requireAdmin({ request, locals });
 
-  const formData = await event.request.formData();
+  const formData = await request.formData();
 
   const name = formData.get("name");
   const description = formData.get("description");
@@ -32,7 +35,7 @@ export const POST: RequestHandler = async (event) => {
         message: "Validasi gagal",
         errors: parsed.error.flatten().fieldErrors,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -47,7 +50,7 @@ export const POST: RequestHandler = async (event) => {
 
   const setting = await updateSetting({
     ...parsed.data,
-    ...(logoUrl ? { logo: logoUrl } : {})
+    ...(logoUrl ? { logo: logoUrl } : {}),
   });
 
   return json(setting);

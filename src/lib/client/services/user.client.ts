@@ -5,18 +5,29 @@ import type { UserFormSchema, UserUpdateSchema } from "$lib/validations/user";
 
 // Create user
 export async function createUser(form: FormData): Promise<UserFormSchema> {
-  return fetcher<UserFormSchema>("/api/users", {
-    method: "POST",
-    body: form,
-  }, userSchema);
+  return fetcher<UserFormSchema>(
+    "/api/users",
+    {
+      method: "POST",
+      body: form,
+    },
+    userSchema,
+  );
 }
 
 // Update user
-export async function updateUser(id: number, form: FormData): Promise<UserUpdateSchema> {
-  return fetcher<UserUpdateSchema>(`/api/users/${id}`, {
-    method: "PUT",
-    body: form,
-  }, userUpdateSchema);
+export async function updateUser(
+  id: number,
+  form: FormData,
+): Promise<UserUpdateSchema> {
+  return fetcher<UserUpdateSchema>(
+    `/api/users/${id}`,
+    {
+      method: "PUT",
+      body: form,
+    },
+    userUpdateSchema,
+  );
 }
 
 // Delete user

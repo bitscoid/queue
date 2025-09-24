@@ -12,7 +12,10 @@ function parseDate(dateStr: string): Date | null {
 /**
  * Helper format date dengan opsi tertentu.
  */
-function formatWithOptions(dateStr: string, options: Intl.DateTimeFormatOptions): string {
+function formatWithOptions(
+  dateStr: string,
+  options: Intl.DateTimeFormatOptions,
+): string {
   const date = parseDate(dateStr);
   if (!date) return "-"; // fallback kalau invalid
   return date.toLocaleString("id-ID", options);

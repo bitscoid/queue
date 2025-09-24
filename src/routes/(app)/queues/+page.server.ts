@@ -1,23 +1,23 @@
 // src/routes/(app)/queues/+page.server.ts
-import type { PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
-import prisma from '$lib/server/prisma';
-import type { Queue } from '$lib/client/stores/queue.store';
+import type { PageServerLoad } from "./$types";
+import { redirect } from "@sveltejs/kit";
+import prisma from "$lib/server/prisma";
+import type { Queue } from "$lib/client/stores/queue.store";
 
 export const load: PageServerLoad = async (event) => {
   const user = event.locals.user;
 
   if (!user) {
-    throw redirect(302, '/login');
+    throw redirect(302, "/login");
   }
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user.role === "admin";
   let queuesList: Queue[] = [];
 
   if (isAdmin) {
     // Admin bisa lihat semua queue
     const allQueues = await prisma.queue.findMany({
-      orderBy: { name: 'asc' }
+      orderBy: { name: "asc" },
     });
 
     queuesList = allQueues.map((q) => ({
@@ -32,18 +32,20 @@ export const load: PageServerLoad = async (event) => {
     // User biasa hanya bisa lihat queue yang dilayaninya
     if (user.queueId) {
       const queue = await prisma.queue.findUnique({
-        where: { id: user.queueId }
+        where: { id: user.queueId },
       });
 
       if (queue) {
-        queuesList = [{
-          id: queue.id,
-          code: queue.code,
-          name: queue.name,
-          ticketPrefix: queue.ticketPrefix,
-          createdAt: queue.createdAt.toISOString(),
-          updatedAt: queue.updatedAt.toISOString(),
-        }];
+        queuesList = [
+          {
+            id: queue.id,
+            code: queue.code,
+            name: queue.name,
+            ticketPrefix: queue.ticketPrefix,
+            createdAt: queue.createdAt.toISOString(),
+            updatedAt: queue.updatedAt.toISOString(),
+          },
+        ];
       }
     }
   }
@@ -52,6 +54,6 @@ export const load: PageServerLoad = async (event) => {
     queues: queuesList,
     isAdmin,
     currentUserId: user.id,
-    userQueueId: user.queueId
+    userQueueId: user.queueId,
   };
 };

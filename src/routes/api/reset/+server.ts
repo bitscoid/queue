@@ -8,10 +8,9 @@ export const POST: RequestHandler = async ({ request }) => {
     const { queueId } = await request.json();
 
     if (!queueId) {
-      return new Response(
-        JSON.stringify({ error: "queueId is required" }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: "queueId is required" }), {
+        status: 400,
+      });
     }
 
     const today = startOfDay(new Date());
@@ -37,14 +36,17 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     return new Response(
-      JSON.stringify({ message: "Sequence reset berhasil", queueId, date: today }),
-      { status: 200 }
+      JSON.stringify({
+        message: "Sequence reset berhasil",
+        queueId,
+        date: today,
+      }),
+      { status: 200 },
     );
   } catch (err) {
     console.error("Reset sequence error:", err);
-    return new Response(
-      JSON.stringify({ error: "Failed to reset sequence" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Failed to reset sequence" }), {
+      status: 500,
+    });
   }
 };

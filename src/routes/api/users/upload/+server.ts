@@ -11,7 +11,7 @@ const mimeMap: Record<string, string> = {
   jpeg: "image/jpeg",
   png: "image/png",
   gif: "image/gif",
-  pdf: "application/pdf"
+  pdf: "application/pdf",
 };
 
 export const POST: RequestHandler = async (event) => {

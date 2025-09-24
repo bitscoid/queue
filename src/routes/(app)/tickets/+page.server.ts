@@ -1,17 +1,17 @@
 // src/routes/(app)/tickets/+page.server.ts
-import type { PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
-import prisma from '$lib/server/prisma';
-import type { TicketDisplay } from '$lib/types';
-import { startOfDay } from '$lib/client/utils/date';
+import type { PageServerLoad } from "./$types";
+import { redirect } from "@sveltejs/kit";
+import prisma from "$lib/server/prisma";
+import type { TicketDisplay } from "$lib/types";
+import { startOfDay } from "$lib/client/utils/date";
 
 export const load: PageServerLoad = async (event) => {
   const user = event.locals.user;
   if (!user) {
-    throw redirect(302, '/login');
+    throw redirect(302, "/login");
   }
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user.role === "admin";
   let tickets: TicketDisplay[] = [];
 
   // Admin bisa lihat semua ticket
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async (event) => {
         queue: true,
         servedByUser: true,
       },
-      orderBy: { date: 'desc' },
+      orderBy: { date: "desc" },
     });
 
     tickets = allTickets.map((t) => ({
@@ -29,11 +29,11 @@ export const load: PageServerLoad = async (event) => {
       date: t.date.toISOString(),
       createdAt: t.createdAt.toISOString(),
       updatedAt: t.updatedAt.toISOString(),
-      queueName: t.queue?.name ?? '',
-      servedByName: t.servedByUser?.name ?? '',
+      queueName: t.queue?.name ?? "",
+      servedByName: t.servedByUser?.name ?? "",
       fullNumber:
         t.fullNumber ??
-        `${t.queue?.ticketPrefix ?? ''}-${String(t.seqNumber).padStart(3, '0')}`,
+        `${t.queue?.ticketPrefix ?? ""}-${String(t.seqNumber).padStart(3, "0")}`,
     }));
   } else {
     // User biasa, hanya ticket dari queue yang dilayani
@@ -51,7 +51,7 @@ export const load: PageServerLoad = async (event) => {
           date: today,
         },
         include: { queue: true, servedByUser: true },
-        orderBy: { seqNumber: 'asc' },
+        orderBy: { seqNumber: "asc" },
       });
 
       tickets = userTickets.map((t) => ({
@@ -59,11 +59,11 @@ export const load: PageServerLoad = async (event) => {
         date: t.date.toISOString(),
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),
-        queueName: t.queue?.name ?? '',
-        servedByName: t.servedByUser?.name ?? '',
+        queueName: t.queue?.name ?? "",
+        servedByName: t.servedByUser?.name ?? "",
         fullNumber:
           t.fullNumber ??
-          `${t.queue?.ticketPrefix ?? ''}-${String(t.seqNumber).padStart(3, '0')}`,
+          `${t.queue?.ticketPrefix ?? ""}-${String(t.seqNumber).padStart(3, "0")}`,
       }));
     }
   }

@@ -2,12 +2,12 @@
 import { writable } from "svelte/store";
 
 export type Queue = {
-    id: number;
-    code: string;
-    name: string;
-    ticketPrefix: string;
-    createdAt: string;
-    updatedAt: string;
+  id: number;
+  code: string;
+  name: string;
+  ticketPrefix: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export const queues = writable<Queue[]>([]);

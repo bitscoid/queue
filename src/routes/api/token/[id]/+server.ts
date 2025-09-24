@@ -1,5 +1,9 @@
 import { json } from "@sveltejs/kit";
-import { updateKey, deleteKey, getKeyById } from "$lib/server/services/token.service";
+import {
+  updateKey,
+  deleteKey,
+  getKeyById,
+} from "$lib/server/services/token.service";
 import { isAdmin, requireAnyRole } from "$lib/server/auth";
 import type { RequestHandler } from "./$types";
 import { tokenUpdateSchema } from "$lib/validations/token";
@@ -46,7 +50,7 @@ export const PUT: RequestHandler = async (event) => {
         message: "Validasi gagal",
         errors: parsed.error.flatten().fieldErrors,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
