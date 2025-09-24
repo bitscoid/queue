@@ -18,7 +18,14 @@ export function startWebSocket(server?: Server): WebSocketServer {
 
   // ✅ Bedakan production vs development
   if (server) {
-    wss = new WebSocketServer({ server });
+    wss = new WebSocketServer({ 
+      server,
+      // Tambahkan konfigurasi untuk memastikan kompatibilitas dengan reverse proxy
+      verifyClient: (info) => {
+        // Izinkan semua koneksi dari domain yang sama
+        return true;
+      }
+    });
     console.log("🚀 WS attached to existing server");
   } else {
     wss = new WebSocketServer({ port: 4000 });

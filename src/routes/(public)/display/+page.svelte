@@ -326,12 +326,14 @@
 
     const wsUrl = import.meta.env.DEV 
       ? "ws://localhost:4000" 
-      : `ws://${window.location.host}`;
+      : window.location.protocol === "https:" 
+        ? `wss://${window.location.host}`
+        : `ws://${window.location.host}`;
       
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      console.log("✅ WebSocket connected");
+      console.log("✅ WebSocket connected to:", wsUrl);
       // Send ping every 30 seconds to keep connection alive
       pingInterval = window.setInterval(() => {
         if (ws && ws.readyState === WebSocket.OPEN) {

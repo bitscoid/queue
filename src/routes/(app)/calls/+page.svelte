@@ -44,12 +44,14 @@
     // Connect to WebSocket for real-time updates
     const wsUrl = import.meta.env.DEV 
       ? "ws://localhost:4000" 
-      : `ws://${window.location.host}`;
+      : window.location.protocol === "https:" 
+        ? `wss://${window.location.host}`
+        : `ws://${window.location.host}`;
     
     ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
-      console.log("✅ WebSocket connected for real-time updates");
+      console.log("✅ WebSocket connected to:", wsUrl);
       isWsConnected = true;
     };
     
