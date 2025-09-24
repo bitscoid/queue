@@ -30,7 +30,7 @@
     'bg-gray-50 border-gray-200 text-gray-800'  // CANCELLED - matches 'Dibatalkan'
   ];
 
-  function getOperatorCardClasses(index) {
+  function getOperatorCardClasses(index: number) {
     const colorClass = statusColors[index % statusColors.length];
     return `p-4 rounded-xl shadow-sm border ${colorClass}`;
   }
@@ -42,7 +42,7 @@
 </script>
 
 <DefaultLayout title="Dashboard">
-  <div class="p-6 max-w-7xl mx-auto space-y-8">
+  <div class="p-6 w-full space-y-8">
     <!-- Key Metrics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg rounded-2xl p-5 border border-blue-400/30">
