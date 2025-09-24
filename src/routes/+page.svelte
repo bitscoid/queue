@@ -22,10 +22,10 @@
     </div>
   </nav>
 
-  <main class="flex-grow flex flex-col items-center justify-center p-6">
+  <main class="bg-base-100 flex-grow flex flex-col items-center justify-center p-6">
     <div class="text-center mb-12">
       <h1 class="text-4xl md:text-5xl font-bold  text-white mb-4">Sistem Antrian Digital</h1>
-      <p class="text-lg  text-white max-w-2xl mx-auto">
+      <p class="text-lg text-white max-w-2xl mx-auto">
         Solusi manajemen antrian modern dengan tampilan real-time dan pengambilan tiket otomatis
       </p>
     </div>
@@ -52,7 +52,7 @@
     </div>
   </main>
 
-  <footer class="py-6 text-center text-gray-500 text-sm">
+  <footer class="bg-base-100 py-6 text-center text-white text-sm">
     <p>© {new Date().getFullYear()} Riza Antrian - Sistem Manajemen Antrian Digital</p>
   </footer>
 </div>
