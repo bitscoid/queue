@@ -20,16 +20,20 @@ export function startWebSocket(server?: Server): WebSocketServer {
   if (server) {
     wss = new WebSocketServer({ 
       server,
+      path: "/ws", // Menentukan path WebSocket untuk production
       // Tambahkan konfigurasi untuk memastikan kompatibilitas dengan reverse proxy
-      verifyClient: (info) => {
+      verifyClient: () => {
         // Izinkan semua koneksi dari domain yang sama
         return true;
       }
     });
-    console.log("🚀 WS attached to existing server");
+    console.log("🚀 WS attached to existing server at /ws");
   } else {
-    wss = new WebSocketServer({ port: 4000 });
-    console.log("🚀 WS standalone at ws://localhost:4000");
+    wss = new WebSocketServer({ 
+      port: 4000,
+      path: "/ws" // Menentukan path WebSocket juga untuk development
+    });
+    console.log("🚀 WS standalone at ws://localhost:4000/ws (for development)");
   }
 
   globalThis.wss = wss;

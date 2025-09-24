@@ -42,13 +42,12 @@
 
   onMount(() => {
     // Connect to WebSocket for real-time updates
-    const wsUrl = import.meta.env.DEV 
-      ? "ws://localhost:4000" 
-      : window.location.protocol === "https:" 
-        ? `wss://${window.location.host}`
-        : `ws://${window.location.host}`;
-    
-    ws = new WebSocket(wsUrl);
+  const wsUrl = import.meta.env.DEV
+    ? "ws://localhost:4000/ws" 
+    : window.location.protocol === "https:"
+      ? `wss://${window.location.host}/ws`
+      : `ws://${window.location.host}/ws`;
+  ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
       console.log("✅ WebSocket connected to:", wsUrl);

@@ -259,7 +259,7 @@ Aplikasi memiliki sistem otentikasi berbasis JWT:
 
 ## 📡 Real-time Updates
 
-- WebSocket server berjalan di port 4000
+- WebSocket server tersedia di path /ws (diintegrasikan dengan server utama di production, dan di port 4000/ws di development)
 - Sinkronisasi real-time antara tampilan, operator, dan admin
 - Middleware Prisma untuk otomatis kirim update saat data berubah
 

@@ -22,11 +22,11 @@ if (!globalThis.__wsStarted) {
   if (server) {
     // Production (adapter-node)
     startWebSocket(server);
-    console.log("✅ WebSocket attached to adapter-node server");
+    console.log("✅ WebSocket attached to adapter-node server at /ws");
   } else {
     // Development (vite dev)
-    startWebSocket(); // otomatis buka port 4000
-    console.log("✅ Dev WebSocket server running at ws://localhost:4000");
+    startWebSocket(); // otomatis buka port 4000 dengan path /ws
+    console.log("✅ Dev WebSocket server running at ws://localhost:4000/ws");
   }
 
   globalThis.__wsStarted = true;

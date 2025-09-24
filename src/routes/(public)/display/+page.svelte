@@ -325,10 +325,10 @@
     }
 
     const wsUrl = import.meta.env.DEV 
-      ? "ws://localhost:4000" 
+      ? "ws://localhost:4000/ws" 
       : window.location.protocol === "https:" 
-        ? `wss://${window.location.host}`
-        : `ws://${window.location.host}`;
+        ? `wss://${window.location.host}/ws`
+        : `ws://${window.location.host}/ws`;
       
     ws = new WebSocket(wsUrl);
 
