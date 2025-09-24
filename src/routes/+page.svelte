@@ -1,11 +1,4 @@
 <script lang="ts">
-  import AuthLayout from '$lib/layouts/AuthLayout.svelte';
-  import LoginForm from '$lib/components/login/LoginForm.svelte';
-
-  function handleSuccess() {
-    window.location.href = '/dashboard';
-  }
-
   // Function to navigate to the display page
   function goToDisplay() {
     window.location.href = '/display';
@@ -25,14 +18,14 @@
       </a>
     </div>
     <div class="navbar-end">
-      <a href="/login" class="btn btn-outline btn-primary">Login Admin</a>
+      <a href="/login" class="btn btn-outline btn-primary">Login</a>
     </div>
   </nav>
 
   <main class="flex-grow flex flex-col items-center justify-center p-6">
     <div class="text-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Sistem Antrian Digital</h1>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+      <h1 class="text-4xl md:text-5xl font-bold  text-white mb-4">Sistem Antrian Digital</h1>
+      <p class="text-lg  text-white max-w-2xl mx-auto">
         Solusi manajemen antrian modern dengan tampilan real-time dan pengambilan tiket otomatis
       </p>
     </div>
@@ -56,14 +49,6 @@
         <h2 class="text-2xl font-bold mb-2">Ambil Antrian</h2>
         <p class="opacity-90">Ambil nomor antrian Anda</p>
       </a>
-    </div>
-
-    <!-- Login Card -->
-    <div class="w-full max-w-md bg-base-100 rounded-2xl shadow-lg p-1 border border-base-200">
-      <div class="w-full max-w-md p-6 shadow-lg bg-base-100 rounded-xl m-4">
-        <h1 class="text-xl font-bold text-center mb-6">Login Admin/Operator</h1>
-        <LoginForm on:success={handleSuccess} />
-      </div>
     </div>
   </main>
 
