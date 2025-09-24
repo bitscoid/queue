@@ -12,8 +12,8 @@
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "🏠" },
-    { href: "/calls", label: "Panggil Antrian", icon: "🎫" },
-    { href: "/queues", label: "Daftar Loket", icon: "📋" },
+    { href: "/calls", label: "Operator", icon: "🎫" },
+    { href: "/queues", label: "Layanan", icon: "📋" },
     { href: "/tickets", label: "Tiket", icon: "📄" },
     { href: "/users", label: "Pengguna", icon: "👤" },
     { href: "/token", label: "API Keys", icon: "🔑" },

@@ -225,6 +225,7 @@
     let totalServed = 0;
     let totalCurrent = 0;
     let totalSkipped = 0;
+    let totalAllTickets = 0; // Total of all tickets regardless of status
     
     queues.forEach(queue => {
       totalRemaining += queue.remaining || 0;
@@ -232,6 +233,7 @@
       // Count tickets by status across all queues
       if (queue.tickets) {
         queue.tickets.forEach(ticket => {
+          totalAllTickets++; // Count all tickets created today
           switch (ticket.status) {
             case "COMPLETED":
               totalServed++;
@@ -246,7 +248,7 @@
     
     return {
       current: totalCurrent,
-      total: totalRemaining + totalCurrent,
+      total: totalAllTickets, // Total of all tickets created today regardless of status
       remaining: totalRemaining,
       served: totalServed,
       skipped: totalSkipped

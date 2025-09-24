@@ -84,7 +84,7 @@ async function buildQueuesPayload() {
                     t.status === "PENDING"
             ).length;
 
-            // Get all currently served tickets (SERVING or CALLED)
+            // Get all currently served tickets (SERVING or CALLED, but not SKIPPED or COMPLETED)
             const currentTickets = q.tickets.filter(
                 (t) => t.status === "SERVING" || t.status === "CALLED"
             );
@@ -108,14 +108,13 @@ async function buildQueuesPayload() {
                     (t) => t.servedByUserId === u.id
                 );
                 
-                // Filter for active tickets (SERVING or CALLED)
+                // Filter for active tickets (SERVING or CALLED, but not SKIPPED or COMPLETED)
                 const activeTickets = userTickets.filter(
                     (t) => t.status === "SERVING" || t.status === "CALLED"
                 );
                 
-                // Get the first active ticket, or first user ticket if no active tickets
-                const ticket = activeTickets.length > 0 ? activeTickets[0] : 
-                              (userTickets.length > 0 ? userTickets[0] : null);
+                // Get the first active ticket, or null if no active tickets
+                const ticket = activeTickets.length > 0 ? activeTickets[0] : null;
                 
                 return {
                     id: u.id,

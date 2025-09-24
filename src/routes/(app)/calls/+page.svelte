@@ -58,8 +58,8 @@
         const data = JSON.parse(event.data);
         console.log("Received WebSocket message:", data);
         if (data.type === "TICKET_CALL") {
-          // Handle ticket call notifications
-          if (data.queue.id === queue.id) {
+          // Handle ticket call notifications - only for current operator
+          if (data.queue.id === queue.id && data.ticket.servedByUserId === currentUserId) {
             showNotificationMessage("Panggilan Tiket", `Memanggil tiket: ${data.ticket.fullNumber}`, "info");
             playNotificationSound();
           }
@@ -69,16 +69,17 @@
           const updatedQueue = data.queues.find((q: any) => q.id === queue.id);
           if (updatedQueue) {
             console.log("Found updated queue:", updatedQueue);
-            // Update queue tickets with all tickets from the updated queue
-            // This ensures we get all relevant tickets regardless of user assignment
-            queue.tickets = (updatedQueue.tickets || queue.tickets).map(t => ({
-              id: t.id,
-              fullNumber: t.fullNumber,
-              status: t.status,
-              servedByUserId: t.servedByUserId
-            }));
+            // Update queue tickets - only include tickets assigned to current user
+            queue.tickets = ((updatedQueue.tickets || queue.tickets)
+              .filter(t => t.servedByUserId === currentUserId) // Only tickets for current user
+              .map(t => ({
+                id: t.id,
+                fullNumber: t.fullNumber,
+                status: t.status,
+                servedByUserId: t.servedByUserId
+              })));
             
-            // Update allTickets for statistics and waiting queue
+            // Update allTickets for statistics and waiting queue (all tickets for the queue)
             allTickets = (updatedQueue.tickets || allTickets).map(t => ({
               id: t.id,
               fullNumber: t.fullNumber,
@@ -495,7 +496,7 @@
         <div class="grid grid-cols-1 gap-4">
           {#each displayedServingTickets as t}
             <div
-              class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl p-5 text-center shadow-lg transform transition-transform hover:scale-105 duration-300 {t.status === 'CALLED' ? 'animate-pulse' : ''}"
+              class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl p-5 text-center shadow-lg {t.status === 'CALLED' ? 'animate-pulse' : ''}"
             >
               <div class="text-3xl font-bold mb-3">{t.fullNumber}</div>
               <div class="text-sm mb-2">Status: {t.status === 'CALLED' ? 'Dipanggil' : 'Dalam Pelayanan'}</div>
