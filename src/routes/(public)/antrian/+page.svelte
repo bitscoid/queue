@@ -180,10 +180,6 @@
     {#if setting.logo}
       <img src={setting.logo} alt="Logo" class="mx-auto w-28 h-28 mb-5" />
     {/if}
-    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">{setting.name}</h1>
-    {#if setting.description}
-      <p class="text-xl mt-3 text-gray-600 max-w-2xl mx-auto">{setting.description}</p>
-    {/if}
   </div>
 
   <!-- Jam Digital -->
@@ -203,8 +199,7 @@
           on:click={() => takeTicket(queues[0].id)}
         >
           <div class="card-body items-center text-center">
-            <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🎫</div>
-            <h3 class="text-2xl font-bold mb-3 text-gray-800">{queues[0].name}</h3>
+            <div class="text-8xl mb-4 group-hover:scale-110 transition-transform duration-300">🎫</div>
             <div class="ticket-button">
               <span class="font-bold text-lg">Ambil Tiket</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" viewBox="0 0 20 20" fill="currentColor">
