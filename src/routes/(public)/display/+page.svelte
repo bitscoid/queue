@@ -544,11 +544,11 @@
         {#if $lastCalledTicket.operator}
           <div class="text-3xl md:text-4xl lg:text-5xl text-white mt-4 md:mt-6">
             {#if $lastCalledTicket.status === "CALLED"}
-              SILAHKAN MENUJU KE {$lastCalledTicket.operator.name}
+              SILAHKAN KE {$lastCalledTicket.operator.name}
             {:else if $lastCalledTicket.status === "SERVING"}
               SEDANG DITANGANI OLEH {$lastCalledTicket.operator.name}
             {:else if $lastCalledTicket.status === "CALLED"}
-              SILAHKAN MENUJU KE {$lastCalledTicket.operator.name}
+              SILAHKAN KE {$lastCalledTicket.operator.name}
             {:else if $lastCalledTicket.status === "SKIPPED"}
               ANTRIAN DILEWATKAN OLEH {$lastCalledTicket.operator.name}
             {:else}
